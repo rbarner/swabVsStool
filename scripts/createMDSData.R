@@ -11,8 +11,8 @@ for(taxa in taxaLevels )
   myPCOA <- capscale(myTLogged~1,distance="bray")
 
   setwd("../mds/")
-  saveRDS(myPCOA$CA$u,file=paste("mds_", taxa, "_logged.txt",sep=""))
-  saveRDS(myPCOA$CA$eig/sum(myPCOA$CA$eig),file=paste("eigenValues_", taxa, "_logged.txt", sep=""))
+  saveRDS(myPCOA$CA$u,file=paste("mds_", taxa, "_logged.RData",sep=""))
+  saveRDS(myPCOA$CA$eig/sum(myPCOA$CA$eig),file=paste("eigenValues_", taxa, "_logged.RData", sep=""))
 }
 
 taxaLevels <- c("otu")
@@ -25,8 +25,8 @@ for(taxa in taxaLevels )
   myPCOA <- capscale(myTLogged~1,distance="bray")
   
   setwd("../mds/")
-  saveRDS(myPCOA$CA$u,file=paste("mds_", taxa, "_logged.txt",sep=""))
-  saveRDS(myPCOA$CA$eig/sum(myPCOA$CA$eig),file=paste("eigenValues_", taxa, "_logged.txt", sep=""))
+  saveRDS(myPCOA$CA$u,file=paste("mds_", taxa, "_logged.RData",sep=""))
+  saveRDS(myPCOA$CA$eig/sum(myPCOA$CA$eig),file=paste("eigenValues_", taxa, "_logged.RData", sep=""))
 }
 
 
@@ -42,10 +42,11 @@ for(wgs in wgsLevels )
   setwd("../metagenomeFunctions/")
   inFileName <- paste("kegg",wgs, ".RData", sep ="")
   myT <-readRDS(inFileName)
+  myT <- myT[-42,]
   myTLogged <- log10((myT*175000) +1)
   myPCOA <- capscale(myTLogged~1,distance="bray")
   
   setwd("../mds/")
-  saveRDS(myPCOA$CA$u,file=paste("mds_", wgs, "_logged.txt",sep=""))
-  saveRDS(myPCOA$CA$eig/sum(myPCOA$CA$eig),file=paste("eigenValues_", wgs, "_logged.txt", sep=""))
+  saveRDS(myPCOA$CA$u,file=paste("mds_", wgs, "_loggedFiltered.RData",sep=""))
+  saveRDS(myPCOA$CA$eig/sum(myPCOA$CA$eig),file=paste("eigenValues_", wgs, "_loggedFiltered.RData", sep=""))
 }
