@@ -1,0 +1,26 @@
+Name	FT00104	FT00109	FT00114	FT00128	FT00149	FT00174	FT00177	FT00182	FT00189	FT00202	FT00220	FT00231	FT00303	FT00311	FT00385	FT00400	ST00001	ST00003	ST00005	ST00006	ST00008	ST00009	ST00015	ST00016	ST00017	ST00018	ST00019	ST00021	ST00023	ST00026	ST00027	ST00028	ST00030	ST00031	ST00035	ST00039	ST00040	ST00041	ST00042	ST00044	ST00045	ST00046	ST00047	ST00050	ST00051	ST00053	ST00054	ST00056	ST00057	ST00059	ST00060	ST00062	ST00063	ST00064	ST00065	ST00067	ST00070	ST00075	ST00077	ST00078	ST00081	ST00082	ST00083	ST00084	ST00085	ST00088	ST00091	ST00092	ST00094	ST00100	ST00101	ST00112	ST00123	ST00132	ST00142	ST00143	ST00146	ST00162	ST00176	ST00184	ST00190	ST00203	ST00205	ST00207	ST00208	ST00219	ST00223	ST00226	ST00227	ST00234	ST00242	ST00259	ST00263	ST00266	ST00278	ST00281	ST00305	ST00338	ST00348	ST00379	ST00382	ST00383	ST00384	ST00386	ST00387	ST00395	ST00411	ST00412	ST00415	ST00420	ST00422	ST00425	ST00465	ST00480	ST00541	SW00001	SW00003	SW00004	SW00006	SW00007	SW00018	SW00021	SW00027	SW00028	SW00032	SW00035	SW00041	SW00106	SW00109	SW00115	SW00116	SW00127	SW00148	SW00172	SW00176	SW00183	SW00197	SW00213	SW00224	SW00295	SW00303	SW00378	SW00395
+Enterobacteriaceae																																																																																																																																															
+Sutterellaceae																																																																																																																																															
+Acidaminococcaceae																																																																																																																																															
+Synergistaceae																																																																																																																																															
+Bifidobacteriaceae																																																																																																																																															
+Porphyromonadaceae																																																																																																																																															
+Bacteroidaceae																																																																																																																																															
+Pasteurellaceae																																																																																																																																															
+Coriobacteriaceae																																																																																																																																															
+Clostridiaceae																																																																																																																																															
+Verrucomicrobiaceae																																																																																																																																															
+Prevotellaceae																																																																																																																																															
+Desulfovibrionaceae																																																																																																																																															
+Clostridiales_noname																																																																																																																																															
+Moraxellaceae																																																																																																																																															
+Ruminococcaceae																																																																																																																																															
+Oscillospiraceae																																																																																																																																															
+Siphoviridae																																																																																																																																															
+Eubacteriaceae																																																																																																																																															
+Rikenellaceae																																																																																																																																															
+Veillonellaceae																																																																																																																																															
+Enterococcaceae																																																																																																																																															
+Streptococcaceae																																																																																																																																															
+Methanobacteriaceae																																																																																																																																															
+Lachnospiraceae																																																																																																																																															
