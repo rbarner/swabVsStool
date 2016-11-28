@@ -1,102 +1,623 @@
-rm(list=ls())
-setwd("C://Users//Roshonda/PPCCT_swabstool/data/mds/")
-sampleData=readRDS("../key/mapping_key_16S.RData");
-taxaLevels <- c("phylum","class","order","family","genus","otu")
+######################## Classifications ################################
+sampleData <- read.delim("data/key/mapping_key_16S.txt",header = TRUE, row.names=1);
+sampleData2 <- read.delim("data/key/mapping_key_WGS.txt",header = TRUE, row.names=1);
+names(sampleData2)[1] <- "Origin"
 
-for(taxa in taxaLevels )
+taxaLevels <- c("phylum","class","order","family","genus")
+classifierList <- c("rdpClassifications", "qiime","metaphlan")
+for(classifier in classifierList)
 {
-  mdsFile <- paste(  "mds_", taxa, "_logged.RData",sep="");
-  eigenFile <- paste(  "eigenValues_", taxa, "_logged.RData",sep="");
-  
-  mds <-readRDS(mdsFile);
-  mdsMeta <- cbind(sampleData,mds);
-  eigen <-readRDS(eigenFile);
-  title <- paste("MDS plot (",taxa," level)",sep="")
-  comp1<-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%",sep=""));
-  comp2<-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%",sep=""));
-  
-  tiff(paste("../../plots/16S/mdsPlot_Axes12_",taxa,"_coloredByOrigin.tiff",sep=""),width=3600,height=3600,compression="lzw",res=350)
-  layout(matrix(c(1,1,1,1,
-                  1,1,1,1,
-                  1,1,1,1,
-                  2,2,2,2),
-                ncol=4,nrow=4,byrow=TRUE));
-  plot(mdsMeta$MDS1,mdsMeta$MDS2,
-       cex=3.5,pch=19,col=ifelse(mdsMeta$Origin=='STOOL','red','blue'),
-       xlab=comp1,ylab=comp2,main=title,
-       las=1,cex.main=1.5,cex.lab=1.5,cex.axis=1.5); 
-  plot.new()
-  legend("center",c("Stool","Swab"),col=c("red","blue"),pch=c(19,19),cex=2,pt.cex=2,box.col="white",horiz=TRUE)
-  dev.off()
-  
-  for(axisNum in seq(1:4))
+  for(taxa in taxaLevels )
   {
-    comp1<-as.character(paste("MDS",axisNum," ",(round(eigen[axisNum],3))*100,"%"));
-    tiff(paste("../../plots/16S/mdsSeparation_",taxa,"_level_axis",axisNum,".tiff",sep=""),width=7000,height=3600,compression="lzw",res=400)
-    layout(matrix(c(1,1,1,1,1,1,1,1,
-                    1,1,1,1,1,1,1,1,
-                    1,1,1,1,1,1,1,1,
-                    0,0,2,2,2,2,0,0),
-                  ncol=8,nrow=4,byrow=TRUE));
-    boxplot(mdsMeta[,35+axisNum]~mdsMeta$study_id,ylab=comp1,xlab="Participants", main=title,xaxt="n", cex=1.5, cex.main=1.75,cex.lab=1.5)
-    points(mdsMeta[,35+axisNum]~mdsMeta$study_id,pch=19,cex=2,col=ifelse(mdsMeta$Origin=='STOOL','red','blue'))
-    plot.new()
-    legend("center",c("Stool","Swab"),col=c("red","blue"),pch=c(19,19),cex=2,pt.cex=2,box.col="white",horiz=TRUE)
-    dev.off()
-  } 
+    setwd("mds")
+    mdsFile <- paste(classifier,"_mds_", taxa, "_loggedFiltered.RData",sep="");
+    eigenFile <- paste(classifier,"_eigenValues_", taxa, "_loggedFiltered.RData",sep="");
+    
+    mds <-readRDS(mdsFile);
+    #sampleData  <- sampleData[-26,]
+    if(classifier %in% "metaphlan")
+    {
+      mdsMeta <- merge(sampleData2,mds, by = "row.names")
+      
+      ################ Generate p-values for plot ##############  
+      test_origin_mds1 <- aov(MDS1~Origin,mdsMeta);
+      pVal_origin_mds1 <- summary(test_origin_mds1)[[1]][["Pr(>F)"]];
+      test_origin_mds2 <- aov(MDS2~Origin,mdsMeta);
+      pVal_origin_mds2 <- summary(test_origin_mds2)[[1]][["Pr(>F)"]];
+      test_origin_mds3 <- aov(MDS3~Origin,mdsMeta);
+      pVal_origin_mds3 <- summary(test_origin_mds3)[[1]][["Pr(>F)"]];
+      test_origin_mds4 <- aov(MDS4~Origin,mdsMeta);
+      pVal_origin_mds4 <- summary(test_origin_mds4)[[1]][["Pr(>F)"]];
+    }
+    else
+    {
+      mdsMeta <- merge(sampleData,mds, by = "row.names")
+     
+      ################ Generate p-values for plot ##############  
+      test_origin_mds1 <- t.test(MDS1~Origin,mdsMeta);
+      pVal_origin_mds1 <- test_origin_mds1$p.value[[1]];
+      test_origin_mds2 <- t.test(MDS2~Origin,mdsMeta);
+      pVal_origin_mds2 <- test_origin_mds2$p.value[[1]];
+      test_origin_mds3 <- t.test(MDS3~Origin,mdsMeta);
+      pVal_origin_mds3 <- test_origin_mds3$p.value[[1]];
+      test_origin_mds4 <- t.test(MDS4~Origin,mdsMeta);
+      pVal_origin_mds4 <- test_origin_mds4$p.value[[1]];
+    }
+    eigen <-readRDS(eigenFile);
+    
+    
+    test_participant_mds1 <- aov(MDS1~study_id,mdsMeta);
+    pVal_participant_mds1 <- summary(test_participant_mds1)[[1]][["Pr(>F)"]];
+    test_participant_mds2 <- aov(MDS2~study_id,mdsMeta);
+    pVal_participant_mds2 <- summary(test_participant_mds2)[[1]][["Pr(>F)"]];
+
+    
+    title <- paste("MDS plot (",taxa," level)",sep="")
+    comp1<-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%,p-value = ",format.pval(pVal_origin_mds1,3)));
+    comp2<-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%,p-value = ",format.pval(pVal_origin_mds2,3)));
+    comp3<-as.character(paste("MDS3"," ",(round(eigen[3],3))*100,"%,p-value = ",format.pval(pVal_origin_mds3,3)));
+    comp4<-as.character(paste("MDS4"," ",(round(eigen[4],3))*100,"%,p-value = ",format.pval(pVal_origin_mds4,3)));
+    
+    setwd("../plots")
+    
+    p <- ggplot(mdsMeta,aes(colour = Origin,shape=Origin))
+    tiff(paste("2_mdsPlot_Axes12_",classifier,"_",taxa,"_coloredByOrigin.tiff",sep=""),width=200,height=200,units="mm",compression="lzw",res=350)
+    print(p + geom_point(aes(MDS1,MDS2),size = 8) +
+            #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
+            scale_colour_manual(values=c("red2","blue3","magenta4")) +
+            xlab(comp1) + ylab(comp2) +
+            ggtitle(title) +
+            theme_classic(base_size = 20)+
+            theme(axis.line=element_line(size=1),
+                  axis.ticks=element_line(size=1),
+                  axis.text=element_text(face="bold",size=16),
+                  text=element_text(face="bold",size=20),
+                  legend.position="bottom",
+                  legend.title=element_blank()
+            )+
+            theme(axis.line.x = element_line(color="black", size = 2),
+                  axis.line.y = element_line(color="black", size = 2)
+            )
+    )
+    graphics.off()
+    
+    p <- ggplot(mdsMeta,aes(x=MDS3,y=MDS4,colour = Origin,shape=Origin))
+    tiff(paste("2_mdsPlot_Axes34_",classifier,"_",taxa,"_coloredByOrigin.tiff",sep=""),width=200,height=200,units="mm",compression="lzw",res=350)
+    print(p + geom_point(size = 8) +
+            #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
+            scale_colour_manual(values=c("red2","blue3","magenta4")) +
+            xlab(comp3) + ylab(comp4) +
+            ggtitle(title) +
+            theme_classic(base_size = 20)+
+            theme(axis.line=element_line(size=1),
+                  axis.ticks=element_line(size=1),
+                  axis.text=element_text(face="bold",size=16),
+                  text=element_text(face="bold",size=20),
+                  legend.position="bottom",
+                  legend.title=element_blank()
+            )+
+            theme(axis.line.x = element_line(color="black", size = 2),
+                  axis.line.y = element_line(color="black", size = 2)
+            )
+    )
+    graphics.off()
+    
+    p <- ggplot(mdsMeta,aes(x=study_id,y=MDS1))
+    tiff(paste("2_mdsPlot_Axes1_",classifier,"_",taxa,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
+    print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
+            #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
+            scale_colour_manual(values=c("red2","blue3","magenta4")) +
+            xlab("Participant") + ylab(comp1) +
+            ggtitle(title) +
+            theme_classic(base_size = 20)+
+            theme(axis.line=element_line(size=1),
+                  axis.ticks.y=element_line(size=1),
+                  axis.ticks.x=element_blank(),
+                  axis.text.y=element_text(face="bold",size=24),
+                  axis.text.x=element_blank(),
+                  text=element_text(face="bold",size=28),
+                  legend.position="bottom",
+                  legend.title=element_blank()
+            )+
+            theme(axis.line.x = element_line(color="black", size = 2),
+                  axis.line.y = element_line(color="black", size = 2)
+            )
+    )
+    graphics.off()
+    
+    p <- ggplot(mdsMeta,aes(x=study_id,y=MDS4))
+    tiff(paste("2_mdsPlot_Axes4_",classifier,"_",taxa,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
+    print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
+            #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
+            scale_colour_manual(values=c("red2","blue3","magenta4")) +
+            xlab("Participant") + ylab(comp4) +
+            ggtitle(title) +
+            theme_classic(base_size = 20)+
+            theme(axis.line=element_line(size=1),
+                  axis.ticks.y=element_line(size=1),
+                  axis.ticks.x=element_blank(),
+                  axis.text.y=element_text(face="bold",size=24),
+                  axis.text.x=element_blank(),
+                  text=element_text(face="bold",size=28),
+                  legend.position="bottom",
+                  legend.title=element_blank()
+            )+
+            theme(axis.line.x = element_line(color="black", size = 2),
+                  axis.line.y = element_line(color="black", size = 2)
+            )
+    )
+    graphics.off()
+   setwd("..") 
+  }
 }
 
-sampleData=readRDS("../key/mapping_key_WGS.RData");
-sampleData <- sampleData[-42,]
-wgsLevels <- c("Families","Pathways_level4",
-               "Pathways_level3",
-               "Pathways_level2",
-               "Pathways_level1",
-               "MetabolicPathways_level2",
-               "MetabolicPathways_level3")
-for(wgs in wgsLevels )
+######################## Gene pathways ################################
+wgsLevels <- c("keggFamilies",
+               "keggPathwaysLevel3",
+               "keggPathwaysLevel2",
+               "keggPathwaysLevel1",
+               "metabolickeggPathwaysLevel2",
+               "metabolickeggPathwaysLevel3")
+functionList <- c("wgs","picrust")
+for(funct in functionList)
 {
-  mdsFile <- paste(  "mds_", wgs, "_loggedFiltered.RData",sep="");
-  eigenFile <- paste(  "eigenValues_", wgs, "_loggedFiltered.RData",sep="");
-  
-  mds <-readRDS(mdsFile);
-  mdsMeta <- cbind(sampleData,mds);
-  eigen <-readRDS(eigenFile);
-  title <- paste("MDS plot (",wgs," level)",sep="")
-  comp1<-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%",sep=""));
-  comp2<-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%",sep=""));
-  
-  tiff(paste("../../plots/WGS/mdsPlot_Axes12_",wgs,"_coloredByOrigin.tiff",sep=""),width=3600,height=3600,compression="lzw",res=350)
-  layout(matrix(c(1,1,1,1,
-                  1,1,1,1,
-                  1,1,1,1,
-                  2,2,2,2),
-                ncol=4,nrow=4,byrow=TRUE));
-  plot(mdsMeta$MDS1,mdsMeta$MDS2,
-       cex=3.5,pch=19,col=ifelse(mdsMeta$type=='stool','red',ifelse(mdsMeta$type=='swab','cyan3','darkmagenta')),
-       xlab=comp1,ylab=comp2,main=title,
-       las=1,cex.main=1.5,cex.lab=1.5,cex.axis=1.5); 
-  plot.new()
-  legend("center",c("Stool","Swab","Tissue"),col=c("red","cyan3","darkmagenta"),pch=c(19,19,19),cex=2,pt.cex=2,box.col="white",horiz=TRUE)
-  dev.off()
-  
-  for(axisNum in seq(1:4))
+  for(wgs in wgsLevels )
   {
-    comp1<-as.character(paste("MDS",axisNum," ",(round(eigen[axisNum],3))*100,"%"));
-    tiff(paste("../../plots/WGS/mdsSeparation_",wgs,"_level_axis",axisNum,".tiff",sep=""),width=7000,height=3600,compression="lzw",res=400)
-    layout(matrix(c(1,1,1,1,1,1,1,1,
-                    1,1,1,1,1,1,1,1,
-                    1,1,1,1,1,1,1,1,
-                    0,0,2,2,2,2,0,0),
-                  ncol=8,nrow=4,byrow=TRUE));
-    boxplot(mdsMeta[,22+axisNum]~mdsMeta$study_id,ylab=comp1,xlab="Participants", main=title,xaxt="n", cex=1.5, cex.main=1.75,cex.lab=1.5)
-    points(mdsMeta[,22+axisNum]~mdsMeta$study_id,pch=19,cex=2,col=ifelse(mdsMeta$type=='stool','red',ifelse(mdsMeta$type=='swab','cyan3','darkmagenta')))
-    plot.new()
-    legend("center",c("Stool","Swab","Tissue"),col=c("red","cyan3","darkmagenta"),pch=c(19,19,19),cex=2,pt.cex=2,box.col="white",horiz=TRUE)
-    dev.off()
+    setwd("mds")
+    mdsFile <- paste(funct,"_mds_", wgs, "_loggedFiltered.RData",sep="");
+    print(mdsFile)
+    eigenFile <- paste(funct,"_eigenValues_", wgs, "_loggedFiltered.RData",sep="");
+    
+    mds <-readRDS(mdsFile);
+    #sampleData  <- sampleData[-26,]
+    if(funct %in% "wgs")
+    {
+      mdsMeta <- merge(sampleData2,mds, by = "row.names")
+      
+      ################ Generate p-values for plot ##############  
+      test_origin_mds1 <- aov(MDS1~Origin,mdsMeta);
+      pVal_origin_mds1 <- summary(test_origin_mds1)[[1]][["Pr(>F)"]];
+      test_origin_mds2 <- aov(MDS2~Origin,mdsMeta);
+      pVal_origin_mds2 <- summary(test_origin_mds2)[[1]][["Pr(>F)"]];
+      test_origin_mds3 <- aov(MDS3~Origin,mdsMeta);
+      pVal_origin_mds3 <- summary(test_origin_mds3)[[1]][["Pr(>F)"]];
+      test_origin_mds4 <- aov(MDS4~Origin,mdsMeta);
+      pVal_origin_mds4 <- summary(test_origin_mds4)[[1]][["Pr(>F)"]];
+    }
+    else
+    {
+      mdsMeta <- merge(sampleData,mds, by = "row.names")
+      
+      ################ Generate p-values for plot ##############  
+      test_origin_mds1 <- t.test(MDS1~Origin,mdsMeta);
+      pVal_origin_mds1 <- test_origin_mds1$p.value[[1]];
+      test_origin_mds2 <- t.test(MDS2~Origin,mdsMeta);
+      pVal_origin_mds2 <- test_origin_mds2$p.value[[1]];
+      test_origin_mds3 <- t.test(MDS3~Origin,mdsMeta);
+      pVal_origin_mds3 <- test_origin_mds3$p.value[[1]];
+      test_origin_mds4 <- t.test(MDS4~Origin,mdsMeta);
+      pVal_origin_mds4 <- test_origin_mds4$p.value[[1]];
+    }
+    eigen <-readRDS(eigenFile);
+    
+    
+    test_participant_mds1 <- aov(MDS1~study_id,mdsMeta);
+    pVal_participant_mds1 <- summary(test_participant_mds1)[[1]][["Pr(>F)"]];
+    test_participant_mds2 <- aov(MDS2~study_id,mdsMeta);
+    pVal_participant_mds2 <- summary(test_participant_mds2)[[1]][["Pr(>F)"]];
+    
+    
+    title <- paste("MDS plot (",wgs," level)",sep="")
+    comp1<-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%,p-value = ",format.pval(pVal_origin_mds1,3)));
+    comp2<-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%,p-value = ",format.pval(pVal_origin_mds2,3)));
+    comp3<-as.character(paste("MDS3"," ",(round(eigen[3],3))*100,"%,p-value = ",format.pval(pVal_origin_mds3,3)));
+    comp4<-as.character(paste("MDS4"," ",(round(eigen[4],3))*100,"%,p-value = ",format.pval(pVal_origin_mds4,3)));
+    
+    setwd("../plots")
+    
+    p <- ggplot(mdsMeta,aes(colour = Origin,shape=Origin))
+    tiff(paste("2_mdsPlot_Axes12_",funct,"_",wgs,"_coloredByOrigin.tiff",sep=""),width=200,height=200,units="mm",compression="lzw",res=350)
+    print(p + geom_point(aes(MDS1,MDS2),size = 8) +
+            #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
+            scale_colour_manual(values=c("red2","blue3","magenta4")) +
+            xlab(comp1) + ylab(comp2) +
+            ggtitle(title) +
+            theme_classic(base_size = 20)+
+            theme(axis.line=element_line(size=1),
+                  axis.ticks=element_line(size=1),
+                  axis.text=element_text(face="bold",size=16),
+                  text=element_text(face="bold",size=20),
+                  legend.position="bottom",
+                  legend.title=element_blank()
+            )+
+            theme(axis.line.x = element_line(color="black", size = 2),
+                  axis.line.y = element_line(color="black", size = 2)
+            )
+    )
+    graphics.off()
+    
+    p <- ggplot(mdsMeta,aes(x=MDS3,y=MDS4,colour = Origin,shape=Origin))
+    tiff(paste("2_mdsPlot_Axes34_",funct,"_",wgs,"_coloredByOrigin.tiff",sep=""),width=200,height=200,units="mm",compression="lzw",res=350)
+    print(p + geom_point(size = 8) +
+            #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
+            scale_colour_manual(values=c("red2","blue3","magenta4")) +
+            xlab(comp3) + ylab(comp4) +
+            ggtitle(title) +
+            theme_classic(base_size = 20)+
+            theme(axis.line=element_line(size=1),
+                  axis.ticks=element_line(size=1),
+                  axis.text=element_text(face="bold",size=16),
+                  text=element_text(face="bold",size=20),
+                  legend.position="bottom",
+                  legend.title=element_blank()
+            )+
+            theme(axis.line.x = element_line(color="black", size = 2),
+                  axis.line.y = element_line(color="black", size = 2)
+            )
+    )
+    graphics.off()
+    
+    p <- ggplot(mdsMeta,aes(x=study_id,y=MDS1))
+    tiff(paste("2_mdsPlot_Axes1_",funct,"_",wgs,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
+    print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
+            #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
+            scale_colour_manual(values=c("red2","blue3","magenta4")) +
+            xlab("Participant") + ylab(comp1) +
+            ggtitle(title) +
+            theme_classic(base_size = 20)+
+            theme(axis.line=element_line(size=1),
+                  axis.ticks.y=element_line(size=1),
+                  axis.ticks.x=element_blank(),
+                  axis.text.y=element_text(face="bold",size=24),
+                  axis.text.x=element_blank(),
+                  text=element_text(face="bold",size=28),
+                  legend.position="bottom",
+                  legend.title=element_blank()
+            )+
+            theme(axis.line.x = element_line(color="black", size = 2),
+                  axis.line.y = element_line(color="black", size = 2)
+            )
+    )
+    graphics.off()
+    
+    p <- ggplot(mdsMeta,aes(x=study_id,y=MDS4))
+    tiff(paste("2_mdsPlot_Axes4_",funct,"_",wgs,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
+    print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
+            #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
+            scale_colour_manual(values=c("red2","blue3","magenta4")) +
+            xlab("Participant") + ylab(comp4) +
+            ggtitle(title) +
+            theme_classic(base_size = 20)+
+            theme(axis.line=element_line(size=1),
+                  axis.ticks.y=element_line(size=1),
+                  axis.ticks.x=element_blank(),
+                  axis.text.y=element_text(face="bold",size=24),
+                  axis.text.x=element_blank(),
+                  text=element_text(face="bold",size=28),
+                  legend.position="bottom",
+                  legend.title=element_blank()
+            )+
+            theme(axis.line.x = element_line(color="black", size = 2),
+                  axis.line.y = element_line(color="black", size = 2)
+            )
+    )
+    graphics.off()
+    setwd("..") 
   }
 }
 
 
+###################################################################################
+sampleData2 <- read.delim("data/key/mapping_key_WGS.txt",header = TRUE, row.names=1);
+sampleData <- sampleData[-26,]
+taxaLevels <- c("pathways_level1","pathways_level2","pathways_level3")
 
 
+
+################################# Make pathway MDS plots ########################
+wgsLevels <- c("keggFamilies",
+               "keggPathwaysLevel3",
+               "keggPathwaysLevel2",
+               "keggPathwaysLevel1",
+               "metabolickeggPathwaysLevel2",
+               "metabolickeggPathwaysLevel3")
+
+for(wgs in wgsLevels )
+{
+  setwd("mds")
+  mdsFile <- paste(funct,"_mds_", wgs, "_loggedFiltered.RData",sep="");
+  print(mdsFile)
+  eigenFile <- paste(funct,"_eigenValues_", wgs, "_loggedFiltered.RData",sep="");
+  
+  mds <-readRDS(mdsFile);
+  #sampleData  <- sampleData[-26,]
+  mdsMeta <- merge(sampleData2,mds, by = "row.names")
+  
+  allStoolPatients <- levels(factor(mdsMeta$study_id[mdsMeta$Origin %in% "stool"]))
+  allSwabPatients <- levels(factor(mdsMeta$study_id[mdsMeta$Origin %in% "swab"]))
+  allTissuePatients <- levels(factor(mdsMeta$study_id[mdsMeta$Origin %in% "tissue"]))
+  matchedTissueSwabPatients <- intersect(allSwabPatients,allTissuePatients)
+  matchedPatients <- intersect(matchedTissueSwabPatients,allStoolPatients)
+  
+  distinctSwabPatients <- allSwabPatients[!allSwabPatients %in% allTissuePatients]
+  distinctStoolPatients <- allStoolPatients[!allStoolPatients %in% c(distinctSwabPatients,allTissuePatients)]
+  distinctPatients <- c(distinctStoolPatients,distinctTissueSwabPatients)
+  
+  mdsMetaDistinct <- mdsMeta[(mdsMeta$study_id %in% allTissuePatients & mdsMeta$Origin %in% "tissue") |(mdsMeta$study_id %in% distinctSwabPatients & mdsMeta$Origin %in% "swab") |(mdsMeta$study_id %in% distinctStoolPatients & mdsMeta$Origin %in% "stool"),];
+  mdsMetaMatched <- mdsMeta[(mdsMeta$study_id %in% matchedPatients),];
+  
+  mdsMetaDistinctPre <- split(mdsMetaDistinct,f=mdsMetaDistinct$visit)$Pre
+  mdsMetaDistinctPost <- split(mdsMetaDistinct,f=mdsMetaDistinct$visit)$Post
+  
+  mdsMetaMatchedPre <- split(mdsMetaMatched,f=mdsMetaMatched$visit)$Pre
+  mdsMetaMatchedPost <- split(mdsMetaMatched,f=mdsMetaMatched$visit)$Post
+  
+  ################ Generate p-values for plot ##############  
+  test_distinctPre_origin_mds1 <- aov(MDS1~Origin,mdsMetaDistinct);
+  pVal_distinctPre_origin_mds1 <- summary(test_distinctPre_origin_mds1)[[1]][["Pr(>F)"]];
+  test_distinctPre_origin_mds2 <- aov(MDS2~Origin,mdsMetaDistinct);
+  pVal_distinctPre_origin_mds2 <- summary(test_distinctPre_origin_mds2)[[1]][["Pr(>F)"]];
+  test_matchedPre_origin_mds1 <- aov(MDS1~Origin,mdsMetaMatched);
+  pVal_matchedPre_origin_mds1 <- summary(test_matchedPre_origin_mds1)[[1]][["Pr(>F)"]];
+  test_matchedPre_origin_mds2 <- aov(MDS2~Origin,mdsMetaMatched);
+  pVal_matchedPre_origin_mds2 <- summary(test_matchedPre_origin_mds2)[[1]][["Pr(>F)"]];
+  
+  test_distinctPost_origin_mds1 <- aov(MDS1~Origin,mdsMetaDistinct);
+  pVal_distinctPost_origin_mds1 <- summary(test_distinctPost_origin_mds1)[[1]][["Pr(>F)"]];
+  test_distinctPost_origin_mds2 <- aov(MDS2~Origin,mdsMetaDistinct);
+  pVal_distinctPost_origin_mds2 <- summary(test_distinctPost_origin_mds2)[[1]][["Pr(>F)"]];
+  test_matchedPost_origin_mds1 <- aov(MDS1~Origin,mdsMetaMatched);
+  pVal_matchedPost_origin_mds1 <- summary(test_matchedPost_origin_mds1)[[1]][["Pr(>F)"]];
+  test_matchedPost_origin_mds2 <- aov(MDS2~Origin,mdsMetaMatched);
+  pVal_matchedPost_origin_mds2 <- summary(test_matchedPost_origin_mds2)[[1]][["Pr(>F)"]];
+  
+ 
+  eigen <-readRDS(eigenFile);
+  
+
+  comp1matchedPre <-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%,p-value = ",format.pval(pVal_matchedPre_origin_mds1,3),sep=""));
+  comp2matchedPre <-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%,p-value = ",format.pval(pVal_matchedPre_origin_mds2,3),sep=""));
+  comp1distinctPre <-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%,p-value = ",format.pval(pVal_distinctPre_origin_mds1,3),sep=""));
+  comp2distinctPre <-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%,p-value = ",format.pval(pVal_distinctPre_origin_mds2,3),sep=""));
+  
+  comp1matchedPost <-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%,p-value = ",format.pval(pVal_matchedPost_origin_mds1,3),sep=""));
+  comp2matchedPost <-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%,p-value = ",format.pval(pVal_matchedPost_origin_mds2,3),sep=""));
+  comp1distinctPost <-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%,p-value = ",format.pval(pVal_distinctPost_origin_mds1,3),sep=""));
+  comp2distinctPost <-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%,p-value = ",format.pval(pVal_distinctPost_origin_mds2,3),sep=""));
+  
+  
+  setwd("../plots")
+  p <- ggplot(mdsMetaDistinctPre,aes(colour = Origin,shape=Origin))
+  tiff(paste("2_mdsPlot_Axes12_",funct,"_",wgs,"_coloredByOrigin_distinctPre.tiff",sep=""),width=200,height=200,units="mm",compression="lzw",res=350)
+  print(p + geom_point(aes(MDS1,MDS2),size = 8) +
+          scale_colour_manual(values=c("red2","blue3","magenta4")) +
+          xlab(comp1distinctPre) + ylab(comp2distinctPre) +
+          ggtitle(title) +
+          theme_classic(base_size = 20)+
+          theme(axis.line=element_line(size=1),
+                axis.ticks=element_line(size=1),
+                axis.text=element_text(face="bold",size=16),
+                text=element_text(face="bold",size=20),
+                legend.position="bottom",
+                legend.title=element_blank()
+          )+
+          theme(axis.line.x = element_line(color="black", size = 2),
+                axis.line.y = element_line(color="black", size = 2)
+          )
+  )
+  graphics.off()
+
+  p <- ggplot(mdsMetaMatchedPre,aes(x=MDS1,y=MDS2,colour = Origin,shape=Origin))
+  tiff(paste("2_mdsPlot_Axes12_",funct,"_",wgs,"_coloredByOrigin_matchedPre.tiff",sep=""),width=200,height=200,units="mm",compression="lzw",res=350)
+  print(p + geom_point(size = 8) +
+          scale_colour_manual(values=c("red2","blue3","magenta4")) +
+          xlab(comp1matchedPre) + ylab(comp2matchedPre) +
+          ggtitle(title) +
+          theme_classic(base_size = 20)+
+          theme(axis.line=element_line(size=1),
+                axis.ticks=element_line(size=1),
+                axis.text=element_text(face="bold",size=16),
+                text=element_text(face="bold",size=20),
+                legend.position="bottom",
+                legend.title=element_blank()
+          )+
+          theme(axis.line.x = element_line(color="black", size = 2),
+                axis.line.y = element_line(color="black", size = 2)
+          )
+  )
+  graphics.off()
+  
+  p <- ggplot(mdsMetaDistinctPost,aes(colour = Origin,shape=Origin))
+  tiff(paste("2_mdsPlot_Axes12_",funct,"_",wgs,"_coloredByOrigin_distinctPost.tiff",sep=""),width=200,height=200,units="mm",compression="lzw",res=350)
+  print(p + geom_point(aes(MDS1,MDS2),size = 8) +
+          scale_colour_manual(values=c("red2","blue3","magenta4")) +
+          xlab(comp1distinctPost) + ylab(comp2distinctPost) +
+          ggtitle(title) +
+          theme_classic(base_size = 20)+
+          theme(axis.line=element_line(size=1),
+                axis.ticks=element_line(size=1),
+                axis.text=element_text(face="bold",size=16),
+                text=element_text(face="bold",size=20),
+                legend.position="bottom",
+                legend.title=element_blank()
+          )+
+          theme(axis.line.x = element_line(color="black", size = 2),
+                axis.line.y = element_line(color="black", size = 2)
+          )
+  )
+  graphics.off()
+  
+  p <- ggplot(mdsMetaMatchedPost,aes(x=MDS1,y=MDS2,colour = Origin,shape=Origin))
+  tiff(paste("2_mdsPlot_Axes12_",funct,"_",wgs,"_coloredByOrigin_matchedPost.tiff",sep=""),width=200,height=200,units="mm",compression="lzw",res=350)
+  print(p + geom_point(size = 8) +
+          scale_colour_manual(values=c("red2","blue3","magenta4")) +
+          xlab(comp1matchedPost) + ylab(comp2matchedPost) +
+          ggtitle(title) +
+          theme_classic(base_size = 20)+
+          theme(axis.line=element_line(size=1),
+                axis.ticks=element_line(size=1),
+                axis.text=element_text(face="bold",size=16),
+                text=element_text(face="bold",size=20),
+                legend.position="bottom",
+                legend.title=element_blank()
+          )+
+          theme(axis.line.x = element_line(color="black", size = 2),
+                axis.line.y = element_line(color="black", size = 2)
+          )
+  )
+  graphics.off()
+  
+  setwd("..") 
+}
+
+########################## Make Metaphlan 
+taxaLevels <- c("phylum","class","order","family","genus")
+for(taxa in taxaLevels )
+{
+  setwd("mds")
+  mdsFile <- paste("metaphlan_mds_", taxa, "_loggedFiltered.RData",sep="");
+  print(mdsFile)
+  eigenFile <- paste("metaphlan_eigenValues_", taxa, "_loggedFiltered.RData",sep="");
+  
+  mds <-readRDS(mdsFile);
+  #sampleData  <- sampleData[-26,]
+  mdsMeta <- merge(sampleData2,mds, by = "row.names")
+  
+  allStoolPatients <- levels(factor(mdsMeta$study_id[mdsMeta$Origin %in% "stool"]))
+  allSwabPatients <- levels(factor(mdsMeta$study_id[mdsMeta$Origin %in% "swab"]))
+  allTissuePatients <- levels(factor(mdsMeta$study_id[mdsMeta$Origin %in% "tissue"]))
+  matchedTissueSwabPatients <- intersect(allSwabPatients,allTissuePatients)
+  matchedPatients <- intersect(matchedTissueSwabPatients,allStoolPatients)
+  
+  distinctSwabPatients <- allSwabPatients[!allSwabPatients %in% allTissuePatients]
+  distinctStoolPatients <- allStoolPatients[!allStoolPatients %in% c(distinctSwabPatients,allTissuePatients)]
+  distinctPatients <- c(distinctStoolPatients,distinctTissueSwabPatients)
+  
+  mdsMetaDistinct <- mdsMeta[(mdsMeta$study_id %in% allTissuePatients & mdsMeta$Origin %in% "tissue") |(mdsMeta$study_id %in% distinctSwabPatients & mdsMeta$Origin %in% "swab") |(mdsMeta$study_id %in% distinctStoolPatients & mdsMeta$Origin %in% "stool"),];
+  mdsMetaMatched <- mdsMeta[(mdsMeta$study_id %in% matchedPatients),];
+  
+  mdsMetaDistinctPre <- split(mdsMetaDistinct,f=mdsMetaDistinct$visit)$Pre
+  mdsMetaDistinctPost <- split(mdsMetaDistinct,f=mdsMetaDistinct$visit)$Post
+  
+  mdsMetaMatchedPre <- split(mdsMetaMatched,f=mdsMetaMatched$visit)$Pre
+  mdsMetaMatchedPost <- split(mdsMetaMatched,f=mdsMetaMatched$visit)$Post
+  
+  ################ Generate p-values for plot ##############  
+  test_distinctPre_origin_mds1 <- aov(MDS1~Origin,mdsMetaDistinctPre);
+  pVal_distinctPre_origin_mds1 <- summary(test_distinctPre_origin_mds1)[[1]][["Pr(>F)"]];
+  test_distinctPre_origin_mds2 <- aov(MDS2~Origin,mdsMetaDistinctPre);
+  pVal_distinctPre_origin_mds2 <- summary(test_distinctPre_origin_mds2)[[1]][["Pr(>F)"]];
+  
+  test_matchedPre_origin_mds1 <- aov(MDS1~Origin,mdsMetaMatchedPre);
+  pVal_matchedPre_origin_mds1 <- summary(test_matchedPre_origin_mds1)[[1]][["Pr(>F)"]];
+  test_matchedPre_origin_mds2 <- aov(MDS2~Origin,mdsMetaMatchedPre);
+  pVal_matchedPre_origin_mds2 <- summary(test_matchedPre_origin_mds2)[[1]][["Pr(>F)"]];
+  
+  test_distinctPost_origin_mds1 <- aov(MDS1~Origin,mdsMetaDistinctPost);
+  pVal_distinctPost_origin_mds1 <- summary(test_distinctPost_origin_mds1)[[1]][["Pr(>F)"]];
+  test_distinctPost_origin_mds2 <- aov(MDS2~Origin,mdsMetaDistinctPost);
+  pVal_distinctPost_origin_mds2 <- summary(test_distinctPost_origin_mds2)[[1]][["Pr(>F)"]];
+  
+  test_matchedPost_origin_mds1 <- aov(MDS1~Origin,mdsMetaMatchedPost);
+  pVal_matchedPost_origin_mds1 <- summary(test_matchedPost_origin_mds1)[[1]][["Pr(>F)"]];
+  test_matchedPost_origin_mds2 <- aov(MDS2~Origin,mdsMetaMatchedPost);
+  pVal_matchedPost_origin_mds2 <- summary(test_matchedPost_origin_mds2)[[1]][["Pr(>F)"]];
+  
+  
+  eigen <-readRDS(eigenFile);
+  
+  
+  comp1matchedPre <-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%,p-value = ",format.pval(pVal_matchedPre_origin_mds1,3),sep=""));
+  comp2matchedPre <-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%,p-value = ",format.pval(pVal_matchedPre_origin_mds2,3),sep=""));
+  comp1distinctPre <-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%,p-value = ",format.pval(pVal_distinctPre_origin_mds1,3),sep=""));
+  comp2distinctPre <-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%,p-value = ",format.pval(pVal_distinctPre_origin_mds2,3),sep=""));
+  
+  comp1matchedPost <-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%,p-value = ",format.pval(pVal_matchedPost_origin_mds1,3),sep=""));
+  comp2matchedPost <-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%,p-value = ",format.pval(pVal_matchedPost_origin_mds2,3),sep=""));
+  comp1distinctPost <-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%,p-value = ",format.pval(pVal_distinctPost_origin_mds1,3),sep=""));
+  comp2distinctPost <-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%,p-value = ",format.pval(pVal_distinctPost_origin_mds2,3),sep=""));
+  
+  
+  setwd("../plots")
+  p <- ggplot(mdsMetaDistinctPre,aes(colour = Origin,shape=Origin))
+  tiff(paste("2_mdsPlot_Axes12_metaphlan_",taxa,"_coloredByOrigin_distinctPre.tiff",sep=""),width=200,height=200,units="mm",compression="lzw",res=350)
+  print(p + geom_point(aes(MDS1,MDS2),size = 8) +
+          scale_colour_manual(values=c("red2","blue3","magenta4")) +
+          xlab(comp1distinctPre) + ylab(comp2distinctPre) +
+          ggtitle(taxa) +
+          theme_classic(base_size = 20)+
+          theme(axis.line=element_line(size=1),
+                axis.ticks=element_line(size=1),
+                axis.text=element_text(face="bold",size=16),
+                text=element_text(face="bold",size=20),
+                legend.position="bottom",
+                legend.title=element_blank()
+          )+
+          theme(axis.line.x = element_line(color="black", size = 2),
+                axis.line.y = element_line(color="black", size = 2)
+          )
+  )
+  graphics.off()
+  
+  p <- ggplot(mdsMetaMatchedPre,aes(x=MDS1,y=MDS2,colour = Origin,shape=Origin))
+  tiff(paste("2_mdsPlot_Axes12_metaphlan_",taxa,"_coloredByOrigin_matchedPre.tiff",sep=""),width=200,height=200,units="mm",compression="lzw",res=350)
+  print(p + geom_point(size = 8) +
+          scale_colour_manual(values=c("red2","blue3","magenta4")) +
+          xlab(comp1matchedPre) + ylab(comp2matchedPre) +
+          ggtitle(taxa) +
+          theme_classic(base_size = 20)+
+          theme(axis.line=element_line(size=1),
+                axis.ticks=element_line(size=1),
+                axis.text=element_text(face="bold",size=16),
+                text=element_text(face="bold",size=20),
+                legend.position="bottom",
+                legend.title=element_blank()
+          )+
+          theme(axis.line.x = element_line(color="black", size = 2),
+                axis.line.y = element_line(color="black", size = 2)
+          )
+  )
+  graphics.off()
+  
+  p <- ggplot(mdsMetaDistinctPost,aes(colour = Origin,shape=Origin))
+  tiff(paste("2_mdsPlot_Axes12_metaphlan_",taxa,"_coloredByOrigin_distinctPost.tiff",sep=""),width=200,height=200,units="mm",compression="lzw",res=350)
+  print(p + geom_point(aes(MDS1,MDS2),size = 8) +
+          scale_colour_manual(values=c("red2","blue3","magenta4")) +
+          xlab(comp1distinctPost) + ylab(comp2distinctPost) +
+          ggtitle(taxa) +
+          theme_classic(base_size = 20)+
+          theme(axis.line=element_line(size=1),
+                axis.ticks=element_line(size=1),
+                axis.text=element_text(face="bold",size=16),
+                text=element_text(face="bold",size=20),
+                legend.position="bottom",
+                legend.title=element_blank()
+          )+
+          theme(axis.line.x = element_line(color="black", size = 2),
+                axis.line.y = element_line(color="black", size = 2)
+          )
+  )
+  graphics.off()
+  
+  p <- ggplot(mdsMetaMatchedPost,aes(x=MDS1,y=MDS2,colour = Origin,shape=Origin))
+  tiff(paste("2_mdsPlot_Axes12_metaphlan_",taxa,"_coloredByOrigin_matchedPost.tiff",sep=""),width=200,height=200,units="mm",compression="lzw",res=350)
+  print(p + geom_point(size = 8) +
+          scale_colour_manual(values=c("red2","blue3","magenta4")) +
+          xlab(comp1matchedPost) + ylab(comp2matchedPost) +
+          ggtitle(taxa) +
+          theme_classic(base_size = 20)+
+          theme(axis.line=element_line(size=1),
+                axis.ticks=element_line(size=1),
+                axis.text=element_text(face="bold",size=16),
+                text=element_text(face="bold",size=20),
+                legend.position="bottom",
+                legend.title=element_blank()
+          )+
+          theme(axis.line.x = element_line(color="black", size = 2),
+                axis.line.y = element_line(color="black", size = 2)
+          )
+  )
+  graphics.off()
+  
+  setwd("..") 
+}

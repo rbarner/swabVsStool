@@ -1,122 +1,221 @@
 library(nlme)
-sampleData=readRDS("../key/mapping_key_16S.RData");
-taxaLevels <- c("phylum","class","order","family","genus")
+
+############################################ Classifications ######################3
+sampleData16S <- read.delim("data/key/mapping_key_16S.txt",header = TRUE, row.names=1);
+sampleData16S$visit <- unlist(strsplit(as.character(sampleData16S$type),split = "_"))[c(FALSE,TRUE)]
+
+taxaLevels <- c("phylum","class","order","family","genus","otu")
 for(taxa in taxaLevels )
 {
-  setwd("../data/microbialClassfications/")
+  setwd("data/microbialClassfications/")
   if(taxa=="otu")
   {
-    inFileName <- paste("qiime_",taxa, "s.RData", sep ="")
+    inFileName <- paste("qiime_",taxa, "Level.txt", sep ="")
+    print(inFileName)
+    bacteria <-read.delim(inFileName,header = TRUE, row.names=1)
+    bacteria <- t(bacteria)
+    bacteriaLogged <- log10((bacteria/rowSums(bacteria))* (sum(colSums(bacteria))/nrow(bacteria)) +1)
+    bacteriaLogged <- bacteriaLogged[,(colSums(bacteriaLogged==0)/nrow(bacteriaLogged))<=0.75]
+    colnames(bacteriaLogged) <- paste("OTU",colnames(bacteriaLogged),sep="")
   }
   else
   {
-    inFileName <- paste("rdpClassifications_",taxa, "Level.RData", sep ="")
+    inFileName <- paste("rdpClassifications_",taxa, "Level.txt", sep ="")
+    print(inFileName)
+    bacteria <-read.delim(inFileName,header = TRUE, row.names=1)
+    bacteria <- t(bacteria)
+    bacteriaLogged <- log10((bacteria/rowSums(bacteria))* (sum(colSums(bacteria))/nrow(bacteria)) +1)
+    bacteriaLogged <- bacteriaLogged[,(colSums(bacteriaLogged==0)/nrow(bacteriaLogged))<=0.75]
+    colnames(bacteriaLogged) <- gsub(" ","_",colnames(bacteriaLogged))
+    colnames(bacteriaLogged) <- gsub("/","_",colnames(bacteriaLogged))
+    colnames(bacteriaLogged) <- gsub("-","_",colnames(bacteriaLogged))
   }
-  bacteria <-readRDS(inFileName)
-  bacteria <- log10((bacteria/rowSums(bacteria))* (sum(colSums(bacteria))/dim(bacteria)[1]) +1)
-  colnames(bacteria) <- gsub(" ","_",colnames(bacteria))
-  colnames(bacteria) <- gsub("/","_",colnames(bacteria))
-  colnames(bacteria) <- gsub("-","_",colnames(bacteria))
-  bacteriaMeta <- cbind(sampleData,bacteria);
+  
+  bacteriaMeta <- merge(sampleData16S,bacteriaLogged,by="row.names");
   bacteriaSwab <- split(bacteriaMeta,bacteriaMeta$Origin)$SWAB
   bacteriaStool <- split(bacteriaMeta,bacteriaMeta$Origin)$STOOL
   
   pValIndividualList <- numeric(0);
   pValOriginList <- numeric(0);
-  pValTreatmentList <- numeric(0);
   pValTimeList <- numeric(0);
-  stoolMeans=colMeans(bacteriaStool[,(dim(sampleData)[2]+1):dim(bacteriaStool)[2]]);
-  swabMeans <- colMeans(bacteriaSwab[,(dim(sampleData)[2]+1):dim(bacteriaSwab)[2]]);
   
-  for(i in (dim(sampleData)[2]+1):dim(bacteriaMeta)[2])
+  stoolMeans <- colMeans(bacteriaStool[,names(bacteriaStool) %in% colnames(bacteriaLogged)]); 
+  swabMeans <- colMeans(bacteriaSwab[,names(bacteriaSwab) %in% colnames(bacteriaLogged)]); 
+  
+  for(i in (ncol(sampleData16S)+2): ncol(bacteriaMeta))
   {
-    model <- as.formula(paste(names(bacteriaMeta)[i],"~","Origin","+","treatment","+","visit"));
+    model <- as.formula(paste(names(bacteriaMeta)[i],"~","Origin","+","visit"));
     print(model);
     
     simpleMod <- gls(model,method="REML",data=bacteriaMeta);
     mixedMod <- lme(model,method="REML",random=~1|study_id,data=bacteriaMeta);
  
-    pValOrigin <-summary(aov(mixedMod,data=bacteriaMeta))[[1]][["Pr(>F)"]][1];
-    pValTreatment <- summary(aov(mixedMod,data=bacteriaMeta))[[1]][["Pr(>F)"]][2];
-    pValTime <- summary(aov(mixedMod,data=bacteriaMeta))[[1]][["Pr(>F)"]][3];
-    pValIndividual <- pchisq(anova(simpleMod,mixedMod)$"L.Ratio"[2],1, lower.tail = FALSE)
+    pValOrigin <- pf(anova(simpleMod)$"F-value"[2],2,236,lower.tail = FALSE);
+    pValTime <- pf(anova(simpleMod)$"F-value"[3],1,236,lower.tail = FALSE);
+    pValIndividual <- pchisq(anova(simpleMod,mixedMod)$"L.Ratio"[2],1,lower.tail = FALSE)
     
     pValOriginList[[length(pValOriginList)+1]] <- pValOrigin;
     pValIndividualList[[length(pValIndividualList)+1]] <- pValIndividual;
-    pValTreatmentList[[length(pValTreatmentList)+1]] <- pValTreatment;
     pValTimeList[[length(pValTimeList)+1]] <- pValTime;
   }
   originAdj <- p.adjust(pValOriginList, method = "fdr")
   individualAdj <- p.adjust(pValIndividualList, method = "fdr")
-  treatmentAdj <- p.adjust(pValTreatmentList, method = "fdr")
   timeAdj <- p.adjust(pValTimeList, method = "fdr")
   
   
-  makeTable=data.frame(colnames(bacteria),stoolMeans,swabMeans,pValOriginList,pValTreatmentList,pValTimeList, pValIndividualList,originAdj,treatmentAdj,timeAdj,individualAdj);
+  makeTable=data.frame(colnames(bacteriaLogged),stoolMeans,swabMeans,pValOriginList,pValTimeList, pValIndividualList,originAdj,timeAdj,individualAdj);
   setwd("../../statisticalModels/")
-  write("Taxa\tstoolMeans\tswabMeans\tOrigin p-value\tTreatment p-value\tTime p-value\tIndividual p-value\tOrigin (adj p-value)\tTreatment (adj p-value)\tTime (adj p-value)\tIndividual (adj p-value)",paste("marginalStatisticalModels_taxaByTaxa_",taxa,".txt",sep=""));
-  write.table(makeTable,paste("marginalStatisticalModels_taxaByTaxa_",taxa,".txt",sep=""),quote=FALSE, sep="\t",append=TRUE, col.names=FALSE, row.names = FALSE);
+  write("Taxa\tstoolMeans\tswabMeans\tOrigin p-value\tTime p-value\tIndividual p-value\tOrigin (adj p-value)\tTime (adj p-value)\tIndividual (adj p-value)",paste("5_marginalStatisticalModels_taxaByTaxa_",taxa,".txt",sep=""));
+  write.table(makeTable,paste("5_marginalStatisticalModels_taxaByTaxa_",taxa,".txt",sep=""),quote=FALSE, sep="\t",append=TRUE, col.names=FALSE, row.names = FALSE);
+  setwd("..")
+}
+
+########################################### Metaphlan classifications ##############################
+sampleDataWGS <- read.delim("data/key/mapping_key_WGS.txt",header = TRUE, row.names=1);
+names(sampleDataWGS)[1] <- "Origin"
+
+taxaLevels <- c("phylum","class","order","family","genus")
+for(taxa in taxaLevels )
+{
+  setwd("data/microbialClassfications/")
+  inFileName <- paste("metaphlan_",taxa, "Level.txt", sep ="")
+  print(inFileName)
+  bacteria <-read.delim(inFileName,header = TRUE, row.names=1)
+  bacteria <- t(bacteria)
+  bacteriaLogged <- log10((bacteria*175000) +1)
+  #bacteriaLogged <- bacteriaLogged[,(colSums(bacteriaLogged==0)/nrow(bacteriaLogged))<=0.95]
+  
+  bacteriaMeta <- merge(sampleDataWGS,bacteriaLogged,by="row.names");
+  bacteriaSwab <- split(bacteriaMeta,bacteriaMeta$Origin)$swab
+  bacteriaStool <- split(bacteriaMeta,bacteriaMeta$Origin)$stool
+  bacteriaTissue <- split(bacteriaMeta,bacteriaMeta$Origin)$tissue
+  
+  pValIndividualList <- numeric(0);
+  pValOriginList <- numeric(0);
+  pValOriginSwabStoolList <- numeric(0);
+  pValOriginTissueStoolList <- numeric(0);
+  pValOriginTissueSwabList <- numeric(0);
+  pValTimeList <- numeric(0);
+  
+  stoolMeans <- colMeans(bacteriaStool[,names(bacteriaStool) %in% colnames(bacteriaLogged)]); 
+  swabMeans <- colMeans(bacteriaSwab[,names(bacteriaSwab) %in% colnames(bacteriaLogged)]); 
+  tissueMeans <- colMeans(bacteriaTissue[,names(bacteriaTissue) %in% colnames(bacteriaLogged)]); 
+  
+  for(i in (ncol(sampleDataWGS)+2): ncol(bacteriaMeta))
+  {
+    model <- as.formula(paste(names(bacteriaMeta)[i],"~","Origin","+","visit"));
+    print(model);
+    
+    simpleMod <- gls(model,method="REML",data=bacteriaMeta);
+    mixedMod <- lme(model,method="REML",random=~1|study_id,data=bacteriaMeta);
+    
+    anovaModForTukey <- aov(model,data=bacteriaMeta)
+    
+    pValOrigin <- pf(anova(simpleMod)$"F-value"[2],2,139,lower.tail = FALSE);
+    pValOriginSwabStool <- TukeyHSD(aov(model,data=bacteriaMeta),"Origin")$Origin[1,4];
+    pValOriginTissueStool <- TukeyHSD(aov(model,data=bacteriaMeta),"Origin")$Origin[2,4];
+    pValOriginTissueSwab <- TukeyHSD(aov(model,data=bacteriaMeta),"Origin")$Origin[3,4];
+    pValTime <- pf(anova(simpleMod)$"F-value"[3],1,139,lower.tail = FALSE);
+    #pValTime <- TukeyHSD(aov(model,data=bacteriaMeta),"visit")$visit[4];
+    pValIndividual <- pchisq(anova(simpleMod,mixedMod)$"L.Ratio"[2],1,lower.tail = FALSE)
+    
+    pValOriginList[[length(pValOriginList)+1]] <- pValOrigin;
+    pValOriginSwabStoolList[[length(pValOriginSwabStoolList)+1]] <- pValOriginSwabStool;
+    pValOriginTissueStoolList[[length(pValOriginTissueStoolList)+1]] <- pValOriginTissueStool;
+    pValOriginTissueSwabList[[length(pValOriginTissueSwabList)+1]] <- pValOriginTissueSwab;
+    pValIndividualList[[length(pValIndividualList)+1]] <- pValIndividual;
+    pValTimeList[[length(pValTimeList)+1]] <- pValTime;
+  }
+  originAdj <- p.adjust(pValOriginList, method = "fdr")
+  originSwabStoolAdj <- p.adjust(pValOriginSwabStoolList, method = "fdr")
+  originTissueStoolAdj <- p.adjust(pValOriginTissueStoolList, method = "fdr")
+  originTissueSwabAdj <- p.adjust(pValOriginTissueSwabList, method = "fdr")
+  individualAdj <- p.adjust(pValIndividualList, method = "fdr")
+  timeAdj <- p.adjust(pValTimeList, method = "fdr")
+  
+  
+  makeTable=data.frame(colnames(bacteriaLogged),stoolMeans,swabMeans,tissueMeans,pValOriginList,pValOriginSwabStoolList,pValOriginTissueStoolList,pValOriginTissueSwabList,pValTimeList, pValIndividualList,originAdj,originSwabStoolAdj,originTissueStoolAdj,originTissueSwabAdj,timeAdj,individualAdj);
+  setwd("../../statisticalModels/")
+  write("Taxa\tstoolMeans\tswabMeans\ttissueMeans\tOrigin p-value\tOriginSwabStool p-value\tOriginTissueStool p-value\tOriginTissueSwab p-value\tTime p-value\tIndividual p-value\tOrigin (adj p-value)\tOriginSwabStool (adj p-value)\tOriginTissueStool (adj p-value)\tOriginTissueSwab (adj p-value)\tTime (adj p-value)\tIndividual (adj p-value)",paste("5_marginalStatisticalModels_taxaByTaxa_",taxa,"_metaphlan.txt",sep=""));
+  write.table(makeTable,paste("5_marginalStatisticalModels_taxaByTaxa_",taxa,"_metaphlan.txt",sep=""),quote=FALSE, sep="\t",append=TRUE, col.names=FALSE, row.names = FALSE);
+  setwd("..")
 }
 
 
-sampleData=read.delim("/Users/Roshonda/Dropbox/FodorLab/dataForProposal/chapter4SwabStool/key/mapping_file_wgs_ordered.txt");
-#sampleData=read.delim("/Users/Roshonda/Dropbox/FodorLab/dataForProposal/chapter4SwabStool/key/mapping_file_wgs_ordered.txt");
-names(sampleData)[2] <- "Origin"
-sampleData  <- sampleData[-42,]
-#taxaLevels <- c("keggFamilies")
-taxaLevels <- c("pathways_level1","pathways_level2","pathways_level3")
-for(taxa in taxaLevels )
+################################################ WGS functions##############################
+sampleDataWGS <- read.delim("data/key/mapping_key_WGS.txt",header = TRUE, row.names=1);
+names(sampleDataWGS)[1] <- "Origin"
+
+wgsLevels <- c("keggPathwaysLevel3",
+               "keggPathwaysLevel2",
+               "keggPathwaysLevel1",
+               "metabolickeggPathwaysLevel2",
+               "metabolickeggPathwaysLevel3")
+
+for(wgs in wgsLevels )
 {
-  setwd("C://Users/Roshonda/Dropbox/FodorLab/dataForProposal/chapter4SwabStool/tables/wgs/")
-  fileName <- paste(  "shrubsole_WGS_",taxa, "LogFiltered_wTissue.txt", sep ="")
-  kegg <-read.delim(fileName,header=TRUE,row.names=1)
-  #kegg <-read.table(fileName,header=TRUE,sep="\t")
+  setwd("data/metagenomeFunctions/")
+  inFileName <- paste("wgs_",wgs, ".txt", sep ="")
+  print(inFileName)
+  kegg <-read.delim(inFileName,header = TRUE, row.names=1)
   kegg <- t(kegg)
-  kegg <- kegg[-42,]
-  #keggNames  <- kegg[1,]
-  #kegg <- kegg[-1,]
-  #colnames(kegg) <- substr(colnames(kegg),1,6)
-  keggMeta <- cbind(sampleData,kegg);
+  keggLogged <- log10((kegg*175000) +1)
+  keggLogged <- keggLogged[,(colSums(keggLogged==0)/nrow(keggLogged))<=0.75]
+  #colnames(keggLogged) <- substr(colnames(keggLogged),1,6)
+  
+  keggMeta <- merge(sampleDataWGS,keggLogged,by="row.names");
   keggSwab <- split(keggMeta,keggMeta$Origin)$swab
   keggStool <- split(keggMeta,keggMeta$Origin)$stool
   keggTissue <- split(keggMeta,keggMeta$Origin)$tissue
   
-  pValIndividualList=numeric(0);
-  pValOriginList=numeric(0);
-  pValTreatmentList = numeric(0);
-  pValTimeList = numeric(0);
-  stoolMeans=colMeans(keggStool[,24:dim(keggStool)[2]]);
-  swabMeans <- colMeans(keggSwab[,24:dim(keggSwab)[2]]);
-  tissueMeans <- colMeans(keggTissue[,24:dim(keggTissue)[2]]);
+  pValIndividualList <- numeric(0);
+  pValOriginList <- numeric(0);
+  pValOriginSwabStoolList <- numeric(0);
+  pValOriginTissueStoolList <- numeric(0);
+  pValOriginTissueSwabList <- numeric(0);
+  pValTimeList <- numeric(0);
   
-  for(i in 1:dim(kegg)[2])
+  stoolMeans <- colMeans(keggStool[,names(keggStool) %in% colnames(keggLogged)]); 
+  swabMeans <- colMeans(keggSwab[,names(keggSwab) %in% colnames(keggLogged)]); 
+  tissueMeans <- colMeans(keggTissue[,names(keggTissue) %in% colnames(keggLogged)]); 
+  
+  for(i in (ncol(sampleDataWGS)+2): ncol(keggMeta))
   {
-    model=as.formula(paste(names(keggMeta)[i+23],"~","Origin","+","treatment","+","visit"));
+    model <- as.formula(paste(names(keggMeta)[i],"~","Origin","+","visit"));
     print(model);
-    simpleMod=lm(model,data=keggMeta);
-    simpleMod2=gls(model,method="REML",data=keggMeta);
-    mixedMod=lme(model,method="REML",random=~1|study_id,data=keggMeta);
     
-    pValOrigin <-summary(aov(mixedMod,data=keggMeta))[[1]][["Pr(>F)"]][1];
-    pValTreatment <- summary(aov(mixedMod,data=keggMeta))[[1]][["Pr(>F)"]][2];
-    pValTime <- summary(aov(mixedMod,data=keggMeta))[[1]][["Pr(>F)"]][3];
-    pValIndividual  <- pchisq(anova(simpleMod2,mixedMod)$"L.Ratio"[2],1, lower.tail = FALSE)
+    simpleMod <- gls(model,method="REML",data=keggMeta);
+    mixedMod <- lme(model,method="REML",random=~1|study_id,data=keggMeta);
     
-    pValOriginList[[length(pValOriginList)+1]]=pValOrigin;
-    pValIndividualList[[length(pValIndividualList)+1]]=pValIndividual;
-    pValTreatmentList[[length(pValTreatmentList)+1]] = pValTreatment;
-    pValTimeList[[length(pValTimeList)+1]] = pValTime;
+    anovaModForTukey <- aov(model,data=keggMeta)
+    
+    pValOrigin <- pf(anova(simpleMod)$"F-value"[2],2,139,lower.tail = FALSE);
+    pValOriginSwabStool <- TukeyHSD(aov(model,data=keggMeta),"Origin")$Origin[1,4];
+    pValOriginTissueStool <- TukeyHSD(aov(model,data=keggMeta),"Origin")$Origin[2,4];
+    pValOriginTissueSwab <- TukeyHSD(aov(model,data=keggMeta),"Origin")$Origin[3,4];
+    pValTime <- pf(anova(simpleMod)$"F-value"[3],1,139,lower.tail = FALSE);
+    #pValTime <- TukeyHSD(aov(model,data=keggMeta),"visit")$visit[4];
+    pValIndividual <- pchisq(anova(simpleMod,mixedMod)$"L.Ratio"[2],1,lower.tail = FALSE)
+    
+    pValOriginList[[length(pValOriginList)+1]] <- pValOrigin;
+    pValOriginSwabStoolList[[length(pValOriginSwabStoolList)+1]] <- pValOriginSwabStool;
+    pValOriginTissueStoolList[[length(pValOriginTissueStoolList)+1]] <- pValOriginTissueStool;
+    pValOriginTissueSwabList[[length(pValOriginTissueSwabList)+1]] <- pValOriginTissueSwab;
+    pValIndividualList[[length(pValIndividualList)+1]] <- pValIndividual;
+    pValTimeList[[length(pValTimeList)+1]] <- pValTime;
   }
   originAdj <- p.adjust(pValOriginList, method = "fdr")
+  originSwabStoolAdj <- p.adjust(pValOriginSwabStoolList, method = "fdr")
+  originTissueStoolAdj <- p.adjust(pValOriginTissueStoolList, method = "fdr")
+  originTissueSwabAdj <- p.adjust(pValOriginTissueSwabList, method = "fdr")
   individualAdj <- p.adjust(pValIndividualList, method = "fdr")
-  treatmentAdj <- p.adjust(pValTreatmentList, method = "fdr")
   timeAdj <- p.adjust(pValTimeList, method = "fdr")
   
-  makeTable=data.frame(colnames(kegg),stoolMeans,swabMeans,tissueMeans,pValOriginList,pValTreatmentList,pValTimeList, pValIndividualList,originAdj,treatmentAdj,timeAdj,individualAdj);
-  #names(makeTable)=cbind("t score","p-value");
-  setwd("C://Users//Roshonda//Dropbox//FodorLab//dataForProposal/chapter4SwabStool/statisticalModels/")
-  write("KeggFunction\tStoolMeans\tSwabMeans\tTissueMeans\tOrigin p-value\tTreatment p-value\tTime p-value\tIndividual p-value\tOrigin (adj p-value)\tTreatment (adj p-value)\tTime (adj p-value)\tIndividual (adj p-value)",paste("anova_functions_",taxa,"_wMeans.txt",sep=""));
-  write.table(makeTable,paste("anova_functions_",taxa,"_wMeans.txt",sep=""),quote=FALSE, sep="\t",append=TRUE, col.names=FALSE, row.names = FALSE);
+  
+  makeTable=data.frame(colnames(keggLogged),stoolMeans,swabMeans,tissueMeans,pValOriginList,pValOriginSwabStoolList,pValOriginTissueStoolList,pValOriginTissueSwabList,pValTimeList, pValIndividualList,originAdj,originSwabStoolAdj,originTissueStoolAdj,originTissueSwabAdj,timeAdj,individualAdj);
+  setwd("../../statisticalModels/")
+  write("wgs\tstoolMeans\tswabMeans\ttissueMeans\tOrigin p-value\tOriginSwabStool p-value\tOriginTissueStool p-value\tOriginTissueSwab p-value\tTime p-value\tIndividual p-value\tOrigin (adj p-value)\tOriginSwabStool (adj p-value)\tOriginTissueStool (adj p-value)\tOriginTissueSwab (adj p-value)\tTime (adj p-value)\tIndividual (adj p-value)",paste("5_marginalStatisticalModels_wgsBywgs_",wgs,"_wgs.txt",sep=""));
+  write.table(makeTable,paste("5_marginalStatisticalModels_wgsBywgs_",wgs,"_wgs.txt",sep=""),quote=FALSE, sep="\t",append=TRUE, col.names=FALSE, row.names = FALSE);
+  setwd("..")
 }
-
 

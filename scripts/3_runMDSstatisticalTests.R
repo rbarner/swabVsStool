@@ -1,76 +1,102 @@
-############ functions used #######################
-setwd("C://Users//Roshonda/PPCCT_swabstool/data/mds/")
-sampleData=readRDS("../key/mapping_key_16S.RData");
-taxaLevels <- c("phylum","class","order","family","genus","otu")
+############ MDS classifications #######################
+sampleData <- read.delim("data/key/mapping_key_16S.txt",header = TRUE, row.names=1);
+sampleData2 <- read.delim("data/key/mapping_key_WGS.txt",header = TRUE, row.names=1);
+names(sampleData2)[1] <- "Origin"
 
-for(taxa in taxaLevels )
+taxaLevels <- c("phylum","class","order","family","genus")
+classifierList <- c("rdpClassifications", "qiime","metaphlan")
+for(classifier in classifierList)
 {
-  mdsFile <- paste(  "mds_", taxa, "_logged.RData",sep="");
-  eigenFile <- paste(  "eigenValues_", taxa, "_logged.RData",sep="");
-  
-  mds <-readRDS(mdsFile);
-  mdsMeta <- cbind(sampleData,mds);
-  eigen <-readRDS(eigenFile);
-
-  pValOriginList=numeric(0);
-  pValIndividualList=numeric(0);
-  for(i in (dim(sampleData)[2]+1): (dim(sampleData)[2]+15))
+  for(taxa in taxaLevels )
   {
-    f<-as.formula(paste(names(mdsMeta)[i],"~","Origin"));
-    ttest <- t.test(f,mdsMeta);
-    pValOrigin <- ttest$p.value[[1]];
-    pValOriginList[[length(pValOriginList)+1]]<- pValOrigin;
+    setwd("mds")
+    mdsFile <- paste(classifier,"_mds_", taxa, "_loggedFiltered.RData",sep="");
+    eigenFile <- paste(classifier,"_eigenValues_", taxa, "_loggedFiltered.RData",sep="");
     
-    g<-as.formula(paste(names(mdsMeta)[i],"~","study_id"));
-    aovtest <- aov(g,mdsMeta);
-    pValIndividual <- anova(aovtest)$"Pr(>F)"[1];
-    pValIndividualList[[length(pValIndividualList)+1]]<- pValIndividual;
-  }
-  originAdj <- p.adjust(pValOriginList,method = "BH")
-  individualAdj <- p.adjust(pValIndividualList,method = "BH")
-  makeTable=data.frame(eigen[1:15]*100,originAdj,individualAdj);
-  names(makeTable)=cbind("Origin adj p-value","Individual adj p-value");
-  write("MDS Axis\t% variation explained\tOrigin adj p-value\tIndividual adj p-value",paste("../../statisticalModels/mds_",taxa,"_individual_origin_pVal.txt",sep=""));
-  write.table(makeTable,paste("../../statisticalModels/mds_",taxa,"_individual_origin_pVal.txt",sep=""),quote=FALSE, sep="\t",append=TRUE, col.names=FALSE); 
+    mds <-readRDS(mdsFile);
+    if(classifier %in% "metaphlan")
+    {
+      mdsMeta <- merge(sampleData2,mds, by = "row.names")
+    }
+    else
+    {
+      mdsMeta <- merge(sampleData,mds, by = "row.names")
+    }
+    eigen <-readRDS(eigenFile);
+    
+    pValOriginList=numeric(0);
+    pValIndividualList=numeric(0);
+    for(i in 1:8)
+    {
+      f<-as.formula(paste("MDS",i,"~","Origin",sep=""));
+      aovtest <- aov(f,mdsMeta);
+      pValOrigin <- anova(aovtest)$"Pr(>F)"[1];
+      pValOriginList[[length(pValOriginList)+1]]<- pValOrigin;
+      
+      g<-as.formula(paste("MDS",i,"~","study_id",sep = ""));
+      aovtest <- aov(g,mdsMeta);
+      pValIndividual <- anova(aovtest)$"Pr(>F)"[1];
+      pValIndividualList[[length(pValIndividualList)+1]]<- pValIndividual;
+    }
+    originAdj <- p.adjust(pValOriginList,method = "BH")
+    individualAdj <- p.adjust(pValIndividualList,method = "BH")
+    makeTable=data.frame(eigen[1:8]*100,originAdj,individualAdj);
+    names(makeTable)=cbind("Origin adj p-value","Individual adj p-value");
+    write("MDS Axis\t% variation explained\tOrigin adj p-value\tIndividual adj p-value",paste("../statisticalModels/3_mds_",taxa,"_",classifier,"_individual_origin_pVal.txt",sep=""));
+    write.table(makeTable,paste("../statisticalModels/3_mds_",taxa,"_",classifier,"_individual_origin_pVal.txt",sep=""),quote=FALSE, sep="\t",append=TRUE, col.names=FALSE); 
+    setwd("..")
+    }
 }
 
+##################################### Functions ################################
+wgsLevels <- c("keggFamilies",
+               "keggPathwaysLevel3",
+               "keggPathwaysLevel2",
+               "keggPathwaysLevel1",
+               "metabolickeggPathwaysLevel2",
+               "metabolickeggPathwaysLevel3")
+functionList <- c("wgs","picrust")
 
-sampleData=readRDS("../key/mapping_key_WGS.RData");
-sampleData <- sampleData[-42,]
-wgsLevels <- c("Families","Pathways_level4",
-               "Pathways_level3",
-               "Pathways_level2",
-               "Pathways_level1",
-               "MetabolicPathways_level2",
-               "MetabolicPathways_level3")
-
-for(wgs in wgsLevels )
+for(funct in functionList)
 {
-  mdsFile <- paste(  "mds_", wgs, "_loggedFiltered.RData",sep="");
-  eigenFile <- paste(  "eigenValues_", wgs, "_loggedFiltered.RData",sep="");
-  
-  mds <-readRDS(mdsFile);
-  mdsMeta <- cbind(sampleData,mds);
-  eigen <-readRDS(eigenFile);
-  
-  pValOriginList=numeric(0);
-  pValIndividualList=numeric(0);
-  for(i in (dim(sampleData)[2]+1): length(names(mdsMeta)))
+  for(wgs in wgsLevels )
   {
-    f<-as.formula(paste(names(mdsMeta)[i],"~","type"));
-    aovtest <- aov(f,mdsMeta);
-    pValOrigin <- anova(aovtest)$"Pr(>F)"[1];
-    pValOriginList[[length(pValOriginList)+1]]<- pValOrigin;
+    setwd("mds")
+    mdsFile <- paste(funct,"_mds_", wgs, "_loggedFiltered.RData",sep="");
+    print(mdsFile)
+    eigenFile <- paste(funct,"_eigenValues_", wgs, "_loggedFiltered.RData",sep="");
     
-    g<-as.formula(paste(names(mdsMeta)[i],"~","study_id"));
-    aovtest2 <- aov(g,mdsMeta);
-    pValIndividual <- anova(aovtest2)$"Pr(>F)"[1];
-    pValIndividualList[[length(pValIndividualList)+1]]<- pValIndividual;
-  }
-  originAdj <- p.adjust(pValOriginList,method = "BH")
-  individualAdj <- p.adjust(pValIndividualList,method = "BH")
-  makeTable=data.frame(eigen*100,originAdj,individualAdj);
-  names(makeTable)=cbind("Origin adj p-value","Individual adj p-value");
-  write("MDS Axis\t% variation explained\tOrigin adj p-value\tIndividual adj p-value",paste("../../statisticalModels/mds_",wgs,"_individual_origin_pVal.txt",sep=""));
-  write.table(makeTable,paste("../../statisticalModels/mds_",wgs,"_individual_origin_pVal.txt",sep=""),quote=FALSE, sep="\t",append=TRUE, col.names=FALSE); 
+    mds <-readRDS(mdsFile);
+    if(funct %in% "wgs")
+    {
+      mdsMeta <- merge(sampleData2,mds, by = "row.names")
+    }
+    else
+    {
+      mdsMeta <- merge(sampleData,mds, by = "row.names")
+    }
+    eigen <-readRDS(eigenFile);
+    
+    pValOriginList=numeric(0);
+    pValIndividualList=numeric(0);
+    for(i in 1:8)
+    {
+      f<-as.formula(paste("MDS",i,"~","Origin",sep=""));
+      aovtest <- aov(f,mdsMeta);
+      pValOrigin <- anova(aovtest)$"Pr(>F)"[1];
+      pValOriginList[[length(pValOriginList)+1]]<- pValOrigin;
+      
+      g<-as.formula(paste("MDS",i,"~","study_id",sep = ""));
+      aovtest2 <- aov(g,mdsMeta);
+      pValIndividual <- anova(aovtest2)$"Pr(>F)"[1];
+      pValIndividualList[[length(pValIndividualList)+1]]<- pValIndividual;
+    }
+    originAdj <- p.adjust(pValOriginList,method = "BH")
+    individualAdj <- p.adjust(pValIndividualList,method = "BH")
+    makeTable=data.frame(eigen[1:8]*100,originAdj,individualAdj);
+    names(makeTable)=cbind("Origin adj p-value","Individual adj p-value");
+    write("MDS Axis\t% variation explained\tOrigin adj p-value\tIndividual adj p-value",paste("../statisticalModels/3_mds_",wgs,"_",funct,"_individual_origin_pVal.txt",sep=""));
+    write.table(makeTable,paste("../statisticalModels/3_mds_",wgs,"_",funct,"_individual_origin_pVal.txt",sep=""),quote=FALSE, sep="\t",append=TRUE, col.names=FALSE); 
+    setwd("..")
+    }
 }
