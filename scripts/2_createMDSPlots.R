@@ -18,45 +18,34 @@ for(classifier in classifierList)
     if(classifier %in% "metaphlan")
     {
       mdsMeta <- merge(sampleData2,mds, by = "row.names")
-      
-      ################ Generate p-values for plot ##############  
-      test_origin_mds1 <- aov(MDS1~Origin,mdsMeta);
-      pVal_origin_mds1 <- summary(test_origin_mds1)[[1]][["Pr(>F)"]];
-      test_origin_mds2 <- aov(MDS2~Origin,mdsMeta);
-      pVal_origin_mds2 <- summary(test_origin_mds2)[[1]][["Pr(>F)"]];
-      test_origin_mds3 <- aov(MDS3~Origin,mdsMeta);
-      pVal_origin_mds3 <- summary(test_origin_mds3)[[1]][["Pr(>F)"]];
-      test_origin_mds4 <- aov(MDS4~Origin,mdsMeta);
-      pVal_origin_mds4 <- summary(test_origin_mds4)[[1]][["Pr(>F)"]];
     }
     else
     {
       mdsMeta <- merge(sampleData,mds, by = "row.names")
-     
-      ################ Generate p-values for plot ##############  
-      test_origin_mds1 <- t.test(MDS1~Origin,mdsMeta);
-      pVal_origin_mds1 <- test_origin_mds1$p.value[[1]];
-      test_origin_mds2 <- t.test(MDS2~Origin,mdsMeta);
-      pVal_origin_mds2 <- test_origin_mds2$p.value[[1]];
-      test_origin_mds3 <- t.test(MDS3~Origin,mdsMeta);
-      pVal_origin_mds3 <- test_origin_mds3$p.value[[1]];
-      test_origin_mds4 <- t.test(MDS4~Origin,mdsMeta);
-      pVal_origin_mds4 <- test_origin_mds4$p.value[[1]];
     }
     eigen <-readRDS(eigenFile);
     
+    ################ Generate p-values for plot ##############  
+    test_origin_mds1 <- aov(MDS1~Origin,mdsMeta);
+    pVal_origin_mds1 <- anova(test_origin_mds1)$"Pr(>F)"[1];
+    test_origin_mds2 <- aov(MDS2~Origin,mdsMeta);
+    pVal_origin_mds2 <- anova(test_origin_mds2)$"Pr(>F)"[1];
+    test_origin_mds3 <- aov(MDS3~Origin,mdsMeta);
+    pVal_origin_mds3 <- anova(test_origin_mds3)$"Pr(>F)"[1];
+    test_origin_mds4 <- aov(MDS4~Origin,mdsMeta);
+    pVal_origin_mds4 <- anova(test_origin_mds4)$"Pr(>F)"[1];
     
     test_participant_mds1 <- aov(MDS1~study_id,mdsMeta);
-    pVal_participant_mds1 <- summary(test_participant_mds1)[[1]][["Pr(>F)"]];
-    test_participant_mds2 <- aov(MDS2~study_id,mdsMeta);
-    pVal_participant_mds2 <- summary(test_participant_mds2)[[1]][["Pr(>F)"]];
+    pVal_participant_mds1 <- anova(test_participant_mds1)$"Pr(>F)"[1];
+    test_participant_mds4 <- aov(MDS4~study_id,mdsMeta);
+    pVal_participant_mds4 <- anova(test_participant_mds4)$"Pr(>F)"[1];
 
     
     title <- paste("MDS plot (",taxa," level)",sep="")
-    comp1<-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%,p-value = ",format.pval(pVal_origin_mds1,3)));
-    comp2<-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%,p-value = ",format.pval(pVal_origin_mds2,3)));
-    comp3<-as.character(paste("MDS3"," ",(round(eigen[3],3))*100,"%,p-value = ",format.pval(pVal_origin_mds3,3)));
-    comp4<-as.character(paste("MDS4"," ",(round(eigen[4],3))*100,"%,p-value = ",format.pval(pVal_origin_mds4,3)));
+    comp1<-as.character(paste("MDS1 ", (round(eigen[1],3))*100,"%, p-value = ",format.pval(pVal_origin_mds1,3),sep=""));
+    comp2<-as.character(paste("MDS2 ", (round(eigen[2],3))*100,"%, p-value = ",format.pval(pVal_origin_mds2,3),sep=""));
+    comp3<-as.character(paste("MDS3 ", (round(eigen[3],3))*100,"%, p-value = ",format.pval(pVal_origin_mds3,3),sep=""));
+    comp4<-as.character(paste("MDS4 ", (round(eigen[4],3))*100,"%, p-value = ",format.pval(pVal_origin_mds4,3),sep=""));
     
     setwd("../plots")
     
@@ -101,6 +90,9 @@ for(classifier in classifierList)
             )
     )
     graphics.off()
+    
+    comp1<-as.character(paste("MDS1 ", (round(eigen[1],3))*100,"%, p-value = ",format.pval(pVal_participant_mds1,3),sep=""));
+    comp4<-as.character(paste("MDS4 ", (round(eigen[4],3))*100,"%, p-value = ",format.pval(pVal_participant_mds4,3),sep=""));
     
     p <- ggplot(mdsMeta,aes(x=study_id,y=MDS1))
     tiff(paste("2_mdsPlot_Axes1_",classifier,"_",taxa,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
@@ -173,45 +165,33 @@ for(funct in functionList)
     if(funct %in% "wgs")
     {
       mdsMeta <- merge(sampleData2,mds, by = "row.names")
-      
-      ################ Generate p-values for plot ##############  
-      test_origin_mds1 <- aov(MDS1~Origin,mdsMeta);
-      pVal_origin_mds1 <- summary(test_origin_mds1)[[1]][["Pr(>F)"]];
-      test_origin_mds2 <- aov(MDS2~Origin,mdsMeta);
-      pVal_origin_mds2 <- summary(test_origin_mds2)[[1]][["Pr(>F)"]];
-      test_origin_mds3 <- aov(MDS3~Origin,mdsMeta);
-      pVal_origin_mds3 <- summary(test_origin_mds3)[[1]][["Pr(>F)"]];
-      test_origin_mds4 <- aov(MDS4~Origin,mdsMeta);
-      pVal_origin_mds4 <- summary(test_origin_mds4)[[1]][["Pr(>F)"]];
     }
     else
     {
       mdsMeta <- merge(sampleData,mds, by = "row.names")
-      
-      ################ Generate p-values for plot ##############  
-      test_origin_mds1 <- t.test(MDS1~Origin,mdsMeta);
-      pVal_origin_mds1 <- test_origin_mds1$p.value[[1]];
-      test_origin_mds2 <- t.test(MDS2~Origin,mdsMeta);
-      pVal_origin_mds2 <- test_origin_mds2$p.value[[1]];
-      test_origin_mds3 <- t.test(MDS3~Origin,mdsMeta);
-      pVal_origin_mds3 <- test_origin_mds3$p.value[[1]];
-      test_origin_mds4 <- t.test(MDS4~Origin,mdsMeta);
-      pVal_origin_mds4 <- test_origin_mds4$p.value[[1]];
     }
     eigen <-readRDS(eigenFile);
     
+    ################ Generate p-values for plot ##############  
+    test_origin_mds1 <- aov(MDS1~Origin,mdsMeta);
+    pVal_origin_mds1 <- anova(test_origin_mds1)$"Pr(>F)"[1];
+    test_origin_mds2 <- aov(MDS2~Origin,mdsMeta);
+    pVal_origin_mds2 <- anova(test_origin_mds2)$"Pr(>F)"[1];
+    test_origin_mds3 <- aov(MDS3~Origin,mdsMeta);
+    pVal_origin_mds3 <- anova(test_origin_mds3)$"Pr(>F)"[1];
+    test_origin_mds4 <- aov(MDS4~Origin,mdsMeta);
+    pVal_origin_mds4 <- anova(test_origin_mds4)$"Pr(>F)"[1];
     
     test_participant_mds1 <- aov(MDS1~study_id,mdsMeta);
-    pVal_participant_mds1 <- summary(test_participant_mds1)[[1]][["Pr(>F)"]];
-    test_participant_mds2 <- aov(MDS2~study_id,mdsMeta);
-    pVal_participant_mds2 <- summary(test_participant_mds2)[[1]][["Pr(>F)"]];
-    
+    pVal_participant_mds1 <- anova(test_participant_mds1)$"Pr(>F)"[1];
+    test_participant_mds4 <- aov(MDS4~study_id,mdsMeta);
+    pVal_participant_mds4 <- anova(test_participant_mds4)$"Pr(>F)"[1];
     
     title <- paste("MDS plot (",wgs," level)",sep="")
-    comp1<-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%,p-value = ",format.pval(pVal_origin_mds1,3)));
-    comp2<-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%,p-value = ",format.pval(pVal_origin_mds2,3)));
-    comp3<-as.character(paste("MDS3"," ",(round(eigen[3],3))*100,"%,p-value = ",format.pval(pVal_origin_mds3,3)));
-    comp4<-as.character(paste("MDS4"," ",(round(eigen[4],3))*100,"%,p-value = ",format.pval(pVal_origin_mds4,3)));
+    comp1<-as.character(paste("MDS1 ", (round(eigen[1],3))*100,"%, p-value = ",format.pval(pVal_origin_mds1,3),sep=""));
+    comp2<-as.character(paste("MDS2 ", (round(eigen[2],3))*100,"%, p-value = ",format.pval(pVal_origin_mds2,3),sep=""));
+    comp3<-as.character(paste("MDS3 ", (round(eigen[3],3))*100,"%, p-value = ",format.pval(pVal_origin_mds3,3),sep=""));
+    comp4<-as.character(paste("MDS4 ", (round(eigen[4],3))*100,"%, p-value = ",format.pval(pVal_origin_mds4,3),sep=""));
     
     setwd("../plots")
     
@@ -257,6 +237,8 @@ for(funct in functionList)
     )
     graphics.off()
     
+    comp1<-as.character(paste("MDS1 ", (round(eigen[1],3))*100,"%, p-value = ",format.pval(pVal_participant_mds1,3),sep=""));
+    comp4<-as.character(paste("MDS4 ", (round(eigen[4],3))*100,"%, p-value = ",format.pval(pVal_participant_mds4,3),sep=""));
     p <- ggplot(mdsMeta,aes(x=study_id,y=MDS1))
     tiff(paste("2_mdsPlot_Axes1_",funct,"_",wgs,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
     print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
@@ -307,13 +289,6 @@ for(funct in functionList)
 }
 
 
-###################################################################################
-sampleData2 <- read.delim("data/key/mapping_key_WGS.txt",header = TRUE, row.names=1);
-sampleData <- sampleData[-26,]
-taxaLevels <- c("pathways_level1","pathways_level2","pathways_level3")
-
-
-
 ################################# Make pathway MDS plots ########################
 wgsLevels <- c("keggFamilies",
                "keggPathwaysLevel3",
@@ -321,7 +296,7 @@ wgsLevels <- c("keggFamilies",
                "keggPathwaysLevel1",
                "metabolickeggPathwaysLevel2",
                "metabolickeggPathwaysLevel3")
-
+funct <- "wgs"
 for(wgs in wgsLevels )
 {
   setwd("mds")
@@ -341,7 +316,6 @@ for(wgs in wgsLevels )
   
   distinctSwabPatients <- allSwabPatients[!allSwabPatients %in% allTissuePatients]
   distinctStoolPatients <- allStoolPatients[!allStoolPatients %in% c(distinctSwabPatients,allTissuePatients)]
-  distinctPatients <- c(distinctStoolPatients,distinctTissueSwabPatients)
   
   mdsMetaDistinct <- mdsMeta[(mdsMeta$study_id %in% allTissuePatients & mdsMeta$Origin %in% "tissue") |(mdsMeta$study_id %in% distinctSwabPatients & mdsMeta$Origin %in% "swab") |(mdsMeta$study_id %in% distinctStoolPatients & mdsMeta$Origin %in% "stool"),];
   mdsMetaMatched <- mdsMeta[(mdsMeta$study_id %in% matchedPatients),];
@@ -354,36 +328,36 @@ for(wgs in wgsLevels )
   
   ################ Generate p-values for plot ##############  
   test_distinctPre_origin_mds1 <- aov(MDS1~Origin,mdsMetaDistinct);
-  pVal_distinctPre_origin_mds1 <- summary(test_distinctPre_origin_mds1)[[1]][["Pr(>F)"]];
+  pVal_distinctPre_origin_mds1 <- anova(test_distinctPre_origin_mds1)$"Pr(>F)"[1];
   test_distinctPre_origin_mds2 <- aov(MDS2~Origin,mdsMetaDistinct);
-  pVal_distinctPre_origin_mds2 <- summary(test_distinctPre_origin_mds2)[[1]][["Pr(>F)"]];
+  pVal_distinctPre_origin_mds2 <- anova(test_distinctPre_origin_mds2)$"Pr(>F)"[1];
   test_matchedPre_origin_mds1 <- aov(MDS1~Origin,mdsMetaMatched);
-  pVal_matchedPre_origin_mds1 <- summary(test_matchedPre_origin_mds1)[[1]][["Pr(>F)"]];
+  pVal_matchedPre_origin_mds1 <- anova(test_matchedPre_origin_mds1)$"Pr(>F)"[1];
   test_matchedPre_origin_mds2 <- aov(MDS2~Origin,mdsMetaMatched);
-  pVal_matchedPre_origin_mds2 <- summary(test_matchedPre_origin_mds2)[[1]][["Pr(>F)"]];
+  pVal_matchedPre_origin_mds2 <- anova(test_matchedPre_origin_mds2)$"Pr(>F)"[1];
   
   test_distinctPost_origin_mds1 <- aov(MDS1~Origin,mdsMetaDistinct);
-  pVal_distinctPost_origin_mds1 <- summary(test_distinctPost_origin_mds1)[[1]][["Pr(>F)"]];
+  pVal_distinctPost_origin_mds1 <- anova(test_distinctPost_origin_mds1)$"Pr(>F)"[1];
   test_distinctPost_origin_mds2 <- aov(MDS2~Origin,mdsMetaDistinct);
-  pVal_distinctPost_origin_mds2 <- summary(test_distinctPost_origin_mds2)[[1]][["Pr(>F)"]];
+  pVal_distinctPost_origin_mds2 <- anova(test_distinctPost_origin_mds2)$"Pr(>F)"[1];
   test_matchedPost_origin_mds1 <- aov(MDS1~Origin,mdsMetaMatched);
-  pVal_matchedPost_origin_mds1 <- summary(test_matchedPost_origin_mds1)[[1]][["Pr(>F)"]];
+  pVal_matchedPost_origin_mds1 <- anova(test_matchedPost_origin_mds1)$"Pr(>F)"[1];
   test_matchedPost_origin_mds2 <- aov(MDS2~Origin,mdsMetaMatched);
-  pVal_matchedPost_origin_mds2 <- summary(test_matchedPost_origin_mds2)[[1]][["Pr(>F)"]];
+  pVal_matchedPost_origin_mds2 <- anova(test_matchedPost_origin_mds2)$"Pr(>F)"[1];
   
  
   eigen <-readRDS(eigenFile);
   
 
-  comp1matchedPre <-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%,p-value = ",format.pval(pVal_matchedPre_origin_mds1,3),sep=""));
-  comp2matchedPre <-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%,p-value = ",format.pval(pVal_matchedPre_origin_mds2,3),sep=""));
-  comp1distinctPre <-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%,p-value = ",format.pval(pVal_distinctPre_origin_mds1,3),sep=""));
-  comp2distinctPre <-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%,p-value = ",format.pval(pVal_distinctPre_origin_mds2,3),sep=""));
+  comp1matchedPre <-as.character(paste("MDS1 ",(round(eigen[1],3))*100,"%, p-value = ",format.pval(pVal_matchedPre_origin_mds1,3),sep=""));
+  comp2matchedPre <-as.character(paste("MDS2 ",(round(eigen[2],3))*100,"%, p-value = ",format.pval(pVal_matchedPre_origin_mds2,3),sep=""));
+  comp1distinctPre <-as.character(paste("MDS1 ",(round(eigen[1],3))*100,"%, p-value = ",format.pval(pVal_distinctPre_origin_mds1,3),sep=""));
+  comp2distinctPre <-as.character(paste("MDS2 ",(round(eigen[2],3))*100,"%, p-value = ",format.pval(pVal_distinctPre_origin_mds2,3),sep=""));
   
-  comp1matchedPost <-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%,p-value = ",format.pval(pVal_matchedPost_origin_mds1,3),sep=""));
-  comp2matchedPost <-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%,p-value = ",format.pval(pVal_matchedPost_origin_mds2,3),sep=""));
-  comp1distinctPost <-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%,p-value = ",format.pval(pVal_distinctPost_origin_mds1,3),sep=""));
-  comp2distinctPost <-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%,p-value = ",format.pval(pVal_distinctPost_origin_mds2,3),sep=""));
+  comp1matchedPost <-as.character(paste("MDS1 ",(round(eigen[1],3))*100,"%, p-value = ",format.pval(pVal_matchedPost_origin_mds1,3),sep=""));
+  comp2matchedPost <-as.character(paste("MDS2 ",(round(eigen[2],3))*100,"%, p-value = ",format.pval(pVal_matchedPost_origin_mds2,3),sep=""));
+  comp1distinctPost <-as.character(paste("MDS1 ",(round(eigen[1],3))*100,"%, p-value = ",format.pval(pVal_distinctPost_origin_mds1,3),sep=""));
+  comp2distinctPost <-as.character(paste("MDS2 ",(round(eigen[2],3))*100,"%, p-value = ",format.pval(pVal_distinctPost_origin_mds2,3),sep=""));
   
   
   setwd("../plots")
@@ -491,7 +465,7 @@ for(taxa in taxaLevels )
   
   distinctSwabPatients <- allSwabPatients[!allSwabPatients %in% allTissuePatients]
   distinctStoolPatients <- allStoolPatients[!allStoolPatients %in% c(distinctSwabPatients,allTissuePatients)]
-  distinctPatients <- c(distinctStoolPatients,distinctTissueSwabPatients)
+  #distinctPatients <- c(distinctStoolPatients,distinctTissueSwabPatients)
   
   mdsMetaDistinct <- mdsMeta[(mdsMeta$study_id %in% allTissuePatients & mdsMeta$Origin %in% "tissue") |(mdsMeta$study_id %in% distinctSwabPatients & mdsMeta$Origin %in% "swab") |(mdsMeta$study_id %in% distinctStoolPatients & mdsMeta$Origin %in% "stool"),];
   mdsMetaMatched <- mdsMeta[(mdsMeta$study_id %in% matchedPatients),];
@@ -504,38 +478,36 @@ for(taxa in taxaLevels )
   
   ################ Generate p-values for plot ##############  
   test_distinctPre_origin_mds1 <- aov(MDS1~Origin,mdsMetaDistinctPre);
-  pVal_distinctPre_origin_mds1 <- summary(test_distinctPre_origin_mds1)[[1]][["Pr(>F)"]];
+  pVal_distinctPre_origin_mds1 <- anova(test_distinctPre_origin_mds1)$"Pr(>F)"[1];
   test_distinctPre_origin_mds2 <- aov(MDS2~Origin,mdsMetaDistinctPre);
-  pVal_distinctPre_origin_mds2 <- summary(test_distinctPre_origin_mds2)[[1]][["Pr(>F)"]];
+  pVal_distinctPre_origin_mds2 <- anova(test_distinctPre_origin_mds2)$"Pr(>F)"[1];
   
   test_matchedPre_origin_mds1 <- aov(MDS1~Origin,mdsMetaMatchedPre);
-  pVal_matchedPre_origin_mds1 <- summary(test_matchedPre_origin_mds1)[[1]][["Pr(>F)"]];
+  pVal_matchedPre_origin_mds1 <- anova(test_matchedPre_origin_mds1)$"Pr(>F)"[1];
   test_matchedPre_origin_mds2 <- aov(MDS2~Origin,mdsMetaMatchedPre);
-  pVal_matchedPre_origin_mds2 <- summary(test_matchedPre_origin_mds2)[[1]][["Pr(>F)"]];
+  pVal_matchedPre_origin_mds2 <- anova(test_matchedPre_origin_mds2)$"Pr(>F)"[1];
   
   test_distinctPost_origin_mds1 <- aov(MDS1~Origin,mdsMetaDistinctPost);
-  pVal_distinctPost_origin_mds1 <- summary(test_distinctPost_origin_mds1)[[1]][["Pr(>F)"]];
+  pVal_distinctPost_origin_mds1 <- anova(test_distinctPost_origin_mds1)$"Pr(>F)"[1];
   test_distinctPost_origin_mds2 <- aov(MDS2~Origin,mdsMetaDistinctPost);
-  pVal_distinctPost_origin_mds2 <- summary(test_distinctPost_origin_mds2)[[1]][["Pr(>F)"]];
+  pVal_distinctPost_origin_mds2 <- anova(test_distinctPost_origin_mds2)$"Pr(>F)"[1];
   
   test_matchedPost_origin_mds1 <- aov(MDS1~Origin,mdsMetaMatchedPost);
   pVal_matchedPost_origin_mds1 <- summary(test_matchedPost_origin_mds1)[[1]][["Pr(>F)"]];
   test_matchedPost_origin_mds2 <- aov(MDS2~Origin,mdsMetaMatchedPost);
   pVal_matchedPost_origin_mds2 <- summary(test_matchedPost_origin_mds2)[[1]][["Pr(>F)"]];
   
-  
   eigen <-readRDS(eigenFile);
   
+  comp1matchedPre <-as.character(paste("MDS1 ",(round(eigen[1],3))*100,"%, p-value = ",format.pval(pVal_matchedPre_origin_mds1,3),sep=""));
+  comp2matchedPre <-as.character(paste("MDS2 ",(round(eigen[2],3))*100,"%, p-value = ",format.pval(pVal_matchedPre_origin_mds2,3),sep=""));
+  comp1distinctPre <-as.character(paste("MDS1 ",(round(eigen[1],3))*100,"%, p-value = ",format.pval(pVal_distinctPre_origin_mds1,3),sep=""));
+  comp2distinctPre <-as.character(paste("MDS2 ",(round(eigen[2],3))*100,"%, p-value = ",format.pval(pVal_distinctPre_origin_mds2,3),sep=""));
   
-  comp1matchedPre <-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%,p-value = ",format.pval(pVal_matchedPre_origin_mds1,3),sep=""));
-  comp2matchedPre <-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%,p-value = ",format.pval(pVal_matchedPre_origin_mds2,3),sep=""));
-  comp1distinctPre <-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%,p-value = ",format.pval(pVal_distinctPre_origin_mds1,3),sep=""));
-  comp2distinctPre <-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%,p-value = ",format.pval(pVal_distinctPre_origin_mds2,3),sep=""));
-  
-  comp1matchedPost <-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%,p-value = ",format.pval(pVal_matchedPost_origin_mds1,3),sep=""));
-  comp2matchedPost <-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%,p-value = ",format.pval(pVal_matchedPost_origin_mds2,3),sep=""));
-  comp1distinctPost <-as.character(paste("MDS1"," ",(round(eigen[1],3))*100,"%,p-value = ",format.pval(pVal_distinctPost_origin_mds1,3),sep=""));
-  comp2distinctPost <-as.character(paste("MDS2"," ",(round(eigen[2],3))*100,"%,p-value = ",format.pval(pVal_distinctPost_origin_mds2,3),sep=""));
+  comp1matchedPost <-as.character(paste("MDS1 ",(round(eigen[1],3))*100,"%, p-value = ",format.pval(pVal_matchedPost_origin_mds1,3),sep=""));
+  comp2matchedPost <-as.character(paste("MDS2 ",(round(eigen[2],3))*100,"%, p-value = ",format.pval(pVal_matchedPost_origin_mds2,3),sep=""));
+  comp1distinctPost <-as.character(paste("MDS1 ",(round(eigen[1],3))*100,"%, p-value = ",format.pval(pVal_distinctPost_origin_mds1,3),sep=""));
+  comp2distinctPost <-as.character(paste("MDS2 ",(round(eigen[2],3))*100,"%, p-value = ",format.pval(pVal_distinctPost_origin_mds2,3),sep=""));
   
   
   setwd("../plots")

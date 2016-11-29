@@ -30,12 +30,12 @@ print(inFileName)
 myT <-read.delim(inFileName,header=TRUE,row.names=1)
 myT <- t(myT)
 myTLogged <- log10((myT/rowSums(myT))* (sum(colSums(myT))/dim(myT)[1]) +1)
-#myTLogged <- myTLogged[,(colSums(myTLogged==0)/dim(myTLogged)[1])<=0.75]
+myTLogged <- myTLogged[,(colSums(myTLogged==0)/dim(myTLogged)[1])<=0.75]
 myPCOA <- capscale(myTLogged~1,distance="bray")
   
 setwd("../../mds/")
-saveRDS(myPCOA$CA$u,file=paste("mds_otu_loggedFiltered.RData",sep=""))
-saveRDS(myPCOA$CA$eig/sum(myPCOA$CA$eig),file=paste("eigenValues_otu_loggedFiltered.RData", sep=""))
+saveRDS(myPCOA$CA$u,file=paste("qiime_mds_otu_loggedFiltered.RData",sep=""))
+saveRDS(myPCOA$CA$eig/sum(myPCOA$CA$eig),file=paste("qiime_eigenValues_otu_loggedFiltered.RData", sep=""))
 setwd("..")
 
 
