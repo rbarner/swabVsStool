@@ -58,6 +58,29 @@ for(taxa in taxaLevels )
   setwd("..")
 }
 
+############################################ Kraken ############################################
+taxaLevels <- c("phylum","class","order","family","genus","species")
+tools <- c("kraken16S","krakenWGS")
+for(tool in tools)
+{
+  for(taxa in taxaLevels )
+  {
+    setwd("data/microbialClassfications/")
+    inFileName <- paste(tool,"_",taxa, "Level.txt", sep ="")
+    print(inFileName)
+    myT <-read.delim(inFileName,header=TRUE, row.names=1)
+    myT <- t(myT)
+    myTLogged <-log10((myT/rowSums(myT))* (sum(colSums(myT))/dim(myT)[1]) +1)
+    myTLogged <- myTLogged[,(colSums(myTLogged==0)/dim(myTLogged)[1])<=0.75]
+    #myTLogged <- myTLogged[,(colSums(myTLogged==0)/dim(myTLogged)[1])<=0.5]
+    myPCOA <- capscale(myTLogged~1,distance="euclidean")
+    
+    setwd("../../mds/")
+    saveRDS(myPCOA$CA$u,file=paste(tool,"_mds_", taxa, "_loggedFiltered.RData",sep=""))
+    saveRDS(myPCOA$CA$eig/sum(myPCOA$CA$eig),file=paste(tool,"_eigenValues_", taxa, "_loggedFiltered.RData", sep=""))
+    setwd("..")
+  }
+}
 ############################################ WGS/PICRUsT functions ############################################
 wgsLevels <- c("keggFamilies",
                "keggPathwaysLevel3",
