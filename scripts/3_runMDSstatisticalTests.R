@@ -1,10 +1,12 @@
+setwd("C://Users/Roshonda/swabVsStoolMicrobiome/")
 ############ MDS classifications #######################
 sampleData <- read.delim("data/key/mapping_key_16S.txt",header = TRUE, row.names=1);
 sampleData2 <- read.delim("data/key/mapping_key_WGS.txt",header = TRUE, row.names=1);
 names(sampleData2)[1] <- "Origin"
 
-taxaLevels <- c("phylum","class","order","family","genus")
-classifierList <- c("rdpClassifications", "qiime","metaphlan")
+taxaLevels <- c("phylum","class","order","family","genus","species")
+#classifierList <- c("rdpClassifications", "qiime","metaphlan","kraken")
+classifierList <- c("kraken16S","krakenWGS")
 for(classifier in classifierList)
 {
   for(taxa in taxaLevels )
@@ -14,7 +16,7 @@ for(classifier in classifierList)
     eigenFile <- paste(classifier,"_eigenValues_", taxa, "_loggedFiltered.RData",sep="");
     
     mds <-readRDS(mdsFile);
-    if(classifier %in% "metaphlan")
+    if(classifier %in% c("metaphlan","kraken"))
     {
       mdsMeta <- merge(sampleData2,mds, by = "row.names")
     }

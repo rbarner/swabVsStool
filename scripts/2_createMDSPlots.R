@@ -1,10 +1,13 @@
+library(ggplot2)
+setwd("C://Users/Roshonda/swabVsStoolMicrobiome/")
 ######################## Classifications ################################
 sampleData <- read.delim("data/key/mapping_key_16S.txt",header = TRUE, row.names=1);
 sampleData2 <- read.delim("data/key/mapping_key_WGS.txt",header = TRUE, row.names=1);
 names(sampleData2)[1] <- "Origin"
 
-taxaLevels <- c("phylum","class","order","family","genus")
-classifierList <- c("rdpClassifications", "qiime","metaphlan")
+taxaLevels <- c("phylum","class","order","family","genus","species")
+#classifierList <- c("rdpClassifications", "qiime","metaphlan")
+classifierList <- c("krakenWGS","kraken16S")
 for(classifier in classifierList)
 {
   for(taxa in taxaLevels )
@@ -15,7 +18,7 @@ for(classifier in classifierList)
     
     mds <-readRDS(mdsFile);
     #sampleData  <- sampleData[-26,]
-    if(classifier %in% "metaphlan")
+    if(classifier %in% c("krakenWGS","metaphlan"))
     {
       mdsMeta <- merge(sampleData2,mds, by = "row.names")
     }
@@ -184,8 +187,8 @@ for(funct in functionList)
     
     test_participant_mds1 <- aov(MDS1~study_id,mdsMeta);
     pVal_participant_mds1 <- anova(test_participant_mds1)$"Pr(>F)"[1];
-    test_participant_mds4 <- aov(MDS4~study_id,mdsMeta);
-    pVal_participant_mds4 <- anova(test_participant_mds4)$"Pr(>F)"[1];
+    test_participant_mds3 <- aov(MDS3~study_id,mdsMeta);
+    pVal_participant_mds3 <- anova(test_participant_mds3)$"Pr(>F)"[1];
     
     title <- paste("MDS plot (",wgs," level)",sep="")
     comp1<-as.character(paste("MDS1 ", (round(eigen[1],3))*100,"%, p-value = ",format.pval(pVal_origin_mds1,3),sep=""));
@@ -238,7 +241,7 @@ for(funct in functionList)
     graphics.off()
     
     comp1<-as.character(paste("MDS1 ", (round(eigen[1],3))*100,"%, p-value = ",format.pval(pVal_participant_mds1,3),sep=""));
-    comp4<-as.character(paste("MDS4 ", (round(eigen[4],3))*100,"%, p-value = ",format.pval(pVal_participant_mds4,3),sep=""));
+    comp3<-as.character(paste("MDS3 ", (round(eigen[3],3))*100,"%, p-value = ",format.pval(pVal_participant_mds3,3),sep=""));
     p <- ggplot(mdsMeta,aes(x=study_id,y=MDS1))
     tiff(paste("2_mdsPlot_Axes1_",funct,"_",wgs,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
     print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
@@ -262,8 +265,8 @@ for(funct in functionList)
     )
     graphics.off()
     
-    p <- ggplot(mdsMeta,aes(x=study_id,y=MDS4))
-    tiff(paste("2_mdsPlot_Axes4_",funct,"_",wgs,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
+    p <- ggplot(mdsMeta,aes(x=study_id,y=MDS3))
+    tiff(paste("2_mdsPlot_Axes3_",funct,"_",wgs,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
     print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
             #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
             scale_colour_manual(values=c("red2","blue3","magenta4")) +
