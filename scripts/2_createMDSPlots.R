@@ -94,15 +94,15 @@ for(classifier in classifierList)
     )
     graphics.off()
     
-    comp1<-as.character(paste("MDS1 ", (round(eigen[1],3))*100,"%, p-value = ",format.pval(pVal_participant_mds1,3),sep=""));
-    comp4<-as.character(paste("MDS4 ", (round(eigen[4],3))*100,"%, p-value = ",format.pval(pVal_participant_mds4,3),sep=""));
+    comp1Participant<-as.character(paste("MDS1 ", (round(eigen[1],3))*100,"%, p-value = ",format.pval(pVal_participant_mds1,3),sep=""));
+    comp4Participant<-as.character(paste("MDS4 ", (round(eigen[4],3))*100,"%, p-value = ",format.pval(pVal_participant_mds4,3),sep=""));
     
     p <- ggplot(mdsMeta,aes(x=study_id,y=MDS1))
     tiff(paste("2_mdsPlot_Axes1_",classifier,"_",taxa,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
     print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
             #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
             scale_colour_manual(values=c("red2","blue3","magenta4")) +
-            xlab("Participant") + ylab(comp1) +
+            xlab("Participant") + ylab(comp1Participant) +
             ggtitle(title) +
             theme_classic(base_size = 20)+
             theme(axis.line=element_line(size=1),
@@ -125,7 +125,7 @@ for(classifier in classifierList)
     print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
             #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
             scale_colour_manual(values=c("red2","blue3","magenta4")) +
-            xlab("Participant") + ylab(comp4) +
+            xlab("Participant") + ylab(comp4Participant) +
             ggtitle(title) +
             theme_classic(base_size = 20)+
             theme(axis.line=element_line(size=1),
@@ -240,14 +240,14 @@ for(funct in functionList)
     )
     graphics.off()
     
-    comp1<-as.character(paste("MDS1 ", (round(eigen[1],3))*100,"%, p-value = ",format.pval(pVal_participant_mds1,3),sep=""));
-    comp3<-as.character(paste("MDS3 ", (round(eigen[3],3))*100,"%, p-value = ",format.pval(pVal_participant_mds3,3),sep=""));
+    comp1Participant <-as.character(paste("MDS1 ", (round(eigen[1],3))*100,"%, p-value = ",format.pval(pVal_participant_mds1,3),sep=""));
+    comp3Participant <-as.character(paste("MDS3 ", (round(eigen[3],3))*100,"%, p-value = ",format.pval(pVal_participant_mds3,3),sep=""));
     p <- ggplot(mdsMeta,aes(x=study_id,y=MDS1))
     tiff(paste("2_mdsPlot_Axes1_",funct,"_",wgs,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
     print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
             #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
             scale_colour_manual(values=c("red2","blue3","magenta4")) +
-            xlab("Participant") + ylab(comp1) +
+            xlab("Participant") + ylab(comp1Participant) +
             ggtitle(title) +
             theme_classic(base_size = 20)+
             theme(axis.line=element_line(size=1),
@@ -270,7 +270,7 @@ for(funct in functionList)
     print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
             #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
             scale_colour_manual(values=c("red2","blue3","magenta4")) +
-            xlab("Participant") + ylab(comp4) +
+            xlab("Participant") + ylab(comp4Participant) +
             ggtitle(title) +
             theme_classic(base_size = 20)+
             theme(axis.line=element_line(size=1),
