@@ -55,7 +55,6 @@ for(classifier in classifierList)
     p <- ggplot(mdsMeta,aes(colour = Origin,shape=Origin))
     tiff(paste("2_mdsPlot_Axes12_",classifier,"_",taxa,"_coloredByOrigin.tiff",sep=""),width=200,height=200,units="mm",compression="lzw",res=350)
     print(p + geom_point(aes(MDS1,MDS2),size = 8) +
-            #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
             scale_colour_manual(values=c("red2","blue3","magenta4")) +
             xlab(comp1) + ylab(comp2) +
             ggtitle(title) +
@@ -76,7 +75,6 @@ for(classifier in classifierList)
     p <- ggplot(mdsMeta,aes(x=MDS3,y=MDS4,colour = Origin,shape=Origin))
     tiff(paste("2_mdsPlot_Axes34_",classifier,"_",taxa,"_coloredByOrigin.tiff",sep=""),width=200,height=200,units="mm",compression="lzw",res=350)
     print(p + geom_point(size = 8) +
-            #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
             scale_colour_manual(values=c("red2","blue3","magenta4")) +
             xlab(comp3) + ylab(comp4) +
             ggtitle(title) +
@@ -94,16 +92,15 @@ for(classifier in classifierList)
     )
     graphics.off()
     
-    comp1Participant<-as.character(paste("MDS1 ", (round(eigen[1],3))*100,"%, p-value = ",format.pval(pVal_participant_mds1,3),sep=""));
-    comp3Participant<-as.character(paste("MDS3 ", (round(eigen[3],3))*100,"%, p-value = ",format.pval(pVal_participant_mds3,3),sep=""));
-    comp4Participant<-as.character(paste("MDS4 ", (round(eigen[4],3))*100,"%, p-value = ",format.pval(pVal_participant_mds4,3),sep=""));
-    
+    comp1Participant<-as.character(paste("MDS1 ", (round(eigen[1],3))*100,"%",sep=""));
+    comp1ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format.pval(pVal_participant_mds1,3),", Origin p-value = ",format.pval(pVal_origin_mds1,3),sep=""));
+
     p <- ggplot(mdsMeta,aes(x=study_id,y=MDS1))
     tiff(paste("2_mdsPlot_Axes1_",classifier,"_",taxa,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
     print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
-            #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
             scale_colour_manual(values=c("red2","blue3","magenta4")) +
-            xlab("Participant") + ylab(comp1Participant) +
+            xlab(comp1ParticipantMDS) +
+            ylab(comp1Participant) +
             ggtitle(title) +
             theme_classic(base_size = 20)+
             theme(axis.line=element_line(size=1),
@@ -121,12 +118,15 @@ for(classifier in classifierList)
     )
     graphics.off()
     
+    comp3Participant<-as.character(paste("MDS3 ", (round(eigen[3],3))*100,"%",sep=""));
+    comp3ParticipantMDS <-as.character(paste("Participant\nParticipant p-value = ",format.pval(pVal_participant_mds3,3),", Origin p-value = ",format.pval(pVal_origin_mds3,3),sep=""));
+
     p <- ggplot(mdsMeta,aes(x=study_id,y=MDS3))
     tiff(paste("2_mdsPlot_Axes3_",classifier,"_",taxa,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
     print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
-            #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
             scale_colour_manual(values=c("red2","blue3","magenta4")) +
-            xlab("Participant") + ylab(comp3Participant) +
+            xlab(comp3ParticipantMDS)+
+            ylab(comp3Participant) +
             ggtitle(title) +
             theme_classic(base_size = 20)+
             theme(axis.line=element_line(size=1),
@@ -143,13 +143,16 @@ for(classifier in classifierList)
             )
     )
     graphics.off()
+    
+    comp4Participant<-as.character(paste("MDS4 ", (round(eigen[4],3))*100,"%",sep=""));
+    comp4ParticipantMDS <-as.character(paste("Participant\nParticipant p-value = ",format.pval(pVal_participant_mds4,3),", Origin p-value = ",format.pval(pVal_origin_mds4,3),sep=""));
     
     p <- ggplot(mdsMeta,aes(x=study_id,y=MDS4))
     tiff(paste("2_mdsPlot_Axes4_",classifier,"_",taxa,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
     print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
-            #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
             scale_colour_manual(values=c("red2","blue3","magenta4")) +
-            xlab("Participant") + ylab(comp4Participant) +
+            xlab(comp4ParticipantMDS) + 
+            ylab(comp4Participant) +
             ggtitle(title) +
             theme_classic(base_size = 20)+
             theme(axis.line=element_line(size=1),
@@ -225,7 +228,6 @@ for(funct in functionList)
     p <- ggplot(mdsMeta,aes(colour = Origin,shape=Origin))
     tiff(paste("2_mdsPlot_Axes12_",funct,"_",wgs,"_coloredByOrigin.tiff",sep=""),width=200,height=200,units="mm",compression="lzw",res=350)
     print(p + geom_point(aes(MDS1,MDS2),size = 8) +
-            #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
             scale_colour_manual(values=c("red2","blue3","magenta4")) +
             xlab(comp1) + ylab(comp2) +
             ggtitle(title) +
@@ -246,7 +248,6 @@ for(funct in functionList)
     p <- ggplot(mdsMeta,aes(x=MDS3,y=MDS4,colour = Origin,shape=Origin))
     tiff(paste("2_mdsPlot_Axes34_",funct,"_",wgs,"_coloredByOrigin.tiff",sep=""),width=200,height=200,units="mm",compression="lzw",res=350)
     print(p + geom_point(size = 8) +
-            #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
             scale_colour_manual(values=c("red2","blue3","magenta4")) +
             xlab(comp3) + ylab(comp4) +
             ggtitle(title) +
@@ -264,14 +265,14 @@ for(funct in functionList)
     )
     graphics.off()
     
-    comp1Participant <-as.character(paste("MDS1 ", (round(eigen[1],3))*100,"%, p-value = ",format.pval(pVal_participant_mds1,3),sep=""));
-    comp3Participant <-as.character(paste("MDS3 ", (round(eigen[3],3))*100,"%, p-value = ",format.pval(pVal_participant_mds3,3),sep=""));
+    comp1Participant<-as.character(paste("MDS1 ", (round(eigen[1],3))*100,"%",sep=""));
+    comp1ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format.pval(pVal_participant_mds1,3),", Origin p-value = ",format.pval(pVal_origin_mds1,3),sep=""));
+    
     p <- ggplot(mdsMeta,aes(x=study_id,y=MDS1))
     tiff(paste("2_mdsPlot_Axes1_",funct,"_",wgs,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
     print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
-            #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
             scale_colour_manual(values=c("red2","blue3","magenta4")) +
-            xlab("Participant") + ylab(comp1Participant) +
+            xlab(comp1ParticipantMDS) + ylab(comp1Participant) +
             ggtitle(title) +
             theme_classic(base_size = 20)+
             theme(axis.line=element_line(size=1),
@@ -288,13 +289,15 @@ for(funct in functionList)
             )
     )
     graphics.off()
-    
+
+    comp3Participant<-as.character(paste("MDS3 ", (round(eigen[3],3))*100,"%",sep=""));
+    comp3ParticipantMDS <-as.character(paste("Participant\nParticipant p-value = ",format.pval(pVal_participant_mds3,3),", Origin p-value = ",format.pval(pVal_origin_mds3,3),sep=""));
     p <- ggplot(mdsMeta,aes(x=study_id,y=MDS3))
     tiff(paste("2_mdsPlot_Axes3_",funct,"_",wgs,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
     print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
             #scale_colour_manual(values=c("#00728F","#DE3A6E")) +
             scale_colour_manual(values=c("red2","blue3","magenta4")) +
-            xlab("Participant") + ylab(comp4Participant) +
+            xlab(comp3ParticipantMDS) + ylab(comp3Participant) +
             ggtitle(title) +
             theme_classic(base_size = 20)+
             theme(axis.line=element_line(size=1),
@@ -316,7 +319,7 @@ for(funct in functionList)
 }
 
 
-################################# Make pathway MDS plots ########################
+################################# Make pathway MDS plots using distinct and matched samples ########################
 wgsLevels <- c("keggFamilies",
                "keggPathwaysLevel3",
                "keggPathwaysLevel2",
