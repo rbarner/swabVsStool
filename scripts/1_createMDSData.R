@@ -112,3 +112,53 @@ for(tool in tools)
     setwd("..")
   }
 }
+
+################################ 1. No tissue ##############################
+############################################ Kraken ############################################
+taxaLevels <- c("phylum","class","order","family","genus","species")
+for(taxa in taxaLevels )
+{
+  setwd("data/microbialClassfications/")
+  inFileName <- paste("krakenWGS","_",taxa, "Level.txt", sep ="")
+  print(inFileName)
+  myT <-read.delim(inFileName,header=TRUE, row.names=1)
+  myT <- t(myT)
+  samplesToBeIncluded <- row.names(myT)[!startsWith(row.names(myT),"FT")]
+  myT <- myT[row.names(myT) %in% samplesToBeIncluded,]
+  myTLogged <-log10((myT/rowSums(myT))* (sum(colSums(myT))/dim(myT)[1]) +1)
+  myTLogged <- myTLogged[,(colSums(myTLogged==0)/dim(myTLogged)[1])<=0.75]
+  #myTLogged <- myTLogged[,(colSums(myTLogged==0)/dim(myTLogged)[1])<=0.5]
+  myPCOA <- capscale(myTLogged~1,distance="euclidean")
+  
+  setwd("../../mds/")
+  saveRDS(myPCOA$CA$u,file=paste("krakenWGS","_mds_", taxa, "_loggedFiltered_NoTissue.RData",sep=""))
+  saveRDS(myPCOA$CA$eig/sum(myPCOA$CA$eig),file=paste("krakenWGS","_eigenValues_", taxa, "_loggedFiltered_NoTissue.RData", sep=""))
+  setwd("..")
+}
+
+############################################ WGS/PICRUsT functions ############################################
+wgsLevels <- c("keggFamilies",
+               "keggPathwaysLevel3",
+               "keggPathwaysLevel2",
+               "keggPathwaysLevel1",
+               "metabolickeggPathwaysLevel2",
+               "metabolickeggPathwaysLevel3")
+for(wgs in wgsLevels )
+{
+  setwd("data/metagenomeFunctions/")
+  inFileName <- paste("wgs_",wgs, ".txt", sep ="")
+  print(inFileName)
+  myT <-read.delim(inFileName,header=TRUE, row.names=1)
+  myT <- t(myT)
+  samplesToBeIncluded <- row.names(myT)[!startsWith(row.names(myT),"FT")]
+  myT <- myT[row.names(myT) %in% samplesToBeIncluded,]
+  myT <- myT[!row.names(myT) %in% "ST00046",]
+  myTLogged <- log10((myT*175000) +1)
+  myTLogged <- myTLogged[,(colSums(myTLogged==0)/dim(myTLogged)[1])<=0.75]
+  myPCOA <- capscale(myTLogged~1,distance="bray")
+  
+  setwd("../../mds/")
+  saveRDS(myPCOA$CA$u,file=paste("wgs_mds_", wgs, "_loggedFiltered_NoTissue.RData",sep=""))
+  saveRDS(myPCOA$CA$eig/sum(myPCOA$CA$eig),file=paste("wgs_eigenValues_", wgs, "_loggedFiltered_NoTissue.RData", sep=""))
+  setwd("..")
+}
