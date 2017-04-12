@@ -131,8 +131,8 @@ for(taxa in taxaLevels )
   myPCOA <- capscale(myTLogged~1,distance="euclidean")
   
   setwd("../../mds/")
-  saveRDS(myPCOA$CA$u,file=paste("krakenWGS","_mds_", taxa, "_loggedFiltered_NoTissue.RData",sep=""))
-  saveRDS(myPCOA$CA$eig/sum(myPCOA$CA$eig),file=paste("krakenWGS","_eigenValues_", taxa, "_loggedFiltered_NoTissue.RData", sep=""))
+  saveRDS(myPCOA$CA$u,file=paste("krakenWGSNoTissue","_mds_", taxa, "_loggedFiltered.RData",sep=""))
+  saveRDS(myPCOA$CA$eig/sum(myPCOA$CA$eig),file=paste("krakenWGSNoTissue","_eigenValues_", taxa, "_loggedFiltered.RData", sep=""))
   setwd("..")
 }
 
@@ -158,7 +158,7 @@ for(wgs in wgsLevels )
   myPCOA <- capscale(myTLogged~1,distance="bray")
   
   setwd("../../mds/")
-  saveRDS(myPCOA$CA$u,file=paste("wgs_mds_", wgs, "_loggedFiltered_NoTissue.RData",sep=""))
-  saveRDS(myPCOA$CA$eig/sum(myPCOA$CA$eig),file=paste("wgs_eigenValues_", wgs, "_loggedFiltered_NoTissue.RData", sep=""))
+  saveRDS(myPCOA$CA$u,file=paste("wgsNoTissue_mds_", wgs, "_loggedFiltered.RData",sep=""))
+  saveRDS(myPCOA$CA$eig/sum(myPCOA$CA$eig),file=paste("wgs_eigenValues_", wgs, "NoTissue_loggedFiltered.RData", sep=""))
   setwd("..")
 }
