@@ -1,0 +1,7 @@
+wgsLevel	Origin p-value	Beta Dispersion
+keggFamilies	0.003	0.754699852185156
+keggPathwaysLevel3	0.002	0.531856212457848
+keggPathwaysLevel2	0.007	0.574544895823177
+keggPathwaysLevel1	0.085	0.385855040593554
+metabolickeggPathwaysLevel2	0.005	0.404030089357989
+metabolickeggPathwaysLevel3	0.002	0.41007981437892

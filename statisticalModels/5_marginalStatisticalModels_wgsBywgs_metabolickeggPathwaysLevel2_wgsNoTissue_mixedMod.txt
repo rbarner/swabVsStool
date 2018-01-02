@@ -1,0 +1,12 @@
+wgs	stoolMeans	stoolSD	swabMeans	swabSD	Origin p-value	Individual p-value	Origin (adj p-value)	Individual (adj p-value)	rsquared marginal	rsquared conditional
+Lipid_Metabolism	3.818	0.39	3.837	0.087	0.831	0.869	0.9141	1	0.008	0.044
+Metabolism_of_Terpenoids_and_Polyketides	3.65	0.107	3.578	0.209	0.00893	0.272	0.019646	0.748	0.056	0.153
+Biosynthesis_of_Other_Secondary_Metabolites	3.516	0.376	3.432	0.229	0.239	0.848	0.328625	1	0.014	0.045
+Amino_Acid_Metabolism	4.412	0.042	4.335	0.095	3.05e-08	1	3.355e-07	1	0.236	0.236
+Metabolism_of_Cofactors_and_Vitamins	4.445	0.044	4.43	0.1	0.448	0.000782	0.547555555555556	0.008602	0.024	0.294
+Nucleotide_Metabolism	3.626	0.061	3.552	0.114	1.59e-05	0.436	5.83e-05	0.9592	0.148	0.21
+Xenobiotics_Biodegradation_and_Metabolism	3.647	0.169	3.592	0.226	0.0366	0.0237	0.0575142857142857	0.0869	0.036	0.246
+Metabolism_of_Other_Amino_Acids	4.155	0.423	4.159	0.113	0.994	0.876	0.994	1	0.004	0.039
+Energy_Metabolism	3.852	0.093	3.736	0.19	2.78e-05	1	7.645e-05	1	0.137	0.137
+Glycan_Biosynthesis_and_Metabolism	3.969	0.065	3.939	0.078	0.0278	0.00437	0.0509666666666667	0.024035	0.042	0.335
+Carbohydrate_Metabolism	4.455	0.069	4.358	0.159	9.48e-06	1	5.214e-05	1	0.155	0.155

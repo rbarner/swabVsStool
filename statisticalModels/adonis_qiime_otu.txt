@@ -1,0 +1,2 @@
+TaxaLevel	Origin p-value	Beta Dispersion
+otu	0.001	0.672434519840496
