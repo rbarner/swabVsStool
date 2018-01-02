@@ -1,7 +1,9 @@
 #library(sfsmisc)
-#rm(list=ls())
+rm(list=ls())
+library(digest)
 library(ggplot2)
 library(nlme)
+
 
 ################### Functions Used #######################
 originMDSPlots <- function(dataSet,MDSX,MDSY,eigen,tool,level)
@@ -57,7 +59,7 @@ participantMDSBoxPlots <- function(dataSet,eigen,MDSX,tool,level)
   print("Stops after participant models")
   title <- paste("MDS plot (",level," level)",sep="")
   comp1Participant<-as.character(paste("MDS",MDSX ," ", (round(eigen[MDSX],3))*100,"%",sep=""));
-  comp1ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format(pVal_participant,digit=3),", Origin p-value = ",format(pVal_origin,digit=3),sep=""));
+  comp1ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format(pVal_participant,digit=3),", Sample Type p-value = ",format(pVal_origin,digit=3),sep=""));
   
   print("Stops after making labels")
   p <- ggplot(mdsMeta,aes_string(x="study_id",y=MDSX_string))
@@ -91,12 +93,12 @@ sampleData$visit <- unlist(strsplit(as.character(sampleData$type),split = "_"))[
 sampleData2 <- read.delim("data/key/mapping_key_WGS.txt",header = TRUE, row.names=1);
 names(sampleData2)[1] <- "Origin"
 
-classifierList <- c("krakenWGS","krakenWGSNoTissue","kraken16S","rdpClassifications", "qiime","metaphlan")
+classifierList <- c("qiime","krakenWGS","krakenWGSNoTissue","kraken16S","rdpClassifications", "metaphlan")
 for(classifier in classifierList)
 {
-  if(classifier %in% c("krakenWGS","kraken16S"))
+  if(classifier %in% c("qiime"))
   {
-    taxaLevels <- c("phylum","class","order","family","genus","species")
+    taxaLevels <- c("phylum","phylumRarefied","class","classRarefied","order","orderRarefied","family","familyRarefied","genus","genusRarefied","otu","otuRarefied")
   }else{
     taxaLevels <- c("phylum","class","order","family","genus")
   }

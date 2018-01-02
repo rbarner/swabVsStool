@@ -1,0 +1,1 @@
+Taxa	stoolMeans	stoolSD	swabMeans	swabSD	Origin p-value	Time p-value	Individual p-value	Origin (adj p-value)	Time (adj p-value)	Individual (adj p-value)

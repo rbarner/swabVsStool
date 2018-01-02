@@ -1,5 +1,6 @@
 rm(list=ls())
 library("vegan")
+setwd("C://Users/Roshonda/swabVsStoolMicrobiome/")
 
 ################################### RDP classifications/ Qiime ################################################################
 taxaLevels <- c("phylum","class","order","family","genus")
@@ -8,7 +9,7 @@ for(tool in tools)
 {
   for(taxa in taxaLevels )
   {
-    setwd("data/microbialClassfications/")
+    setwd("data/microbialClassifications/")
     inFileName <- paste(tool,"_",taxa, "Level.txt", sep ="")
     print(inFileName)
     myT <-read.delim(inFileName,header = TRUE, row.names=1)
@@ -24,7 +25,7 @@ for(tool in tools)
   }
 }
 ###################################################### OTUs #############################################################33
-setwd("data/microbialClassfications/")
+setwd("data/microbialClassifications/")
 inFileName <- paste("qiime_otuLevel.txt", sep ="")
 print(inFileName)
 myT <-read.delim(inFileName,header=TRUE,row.names=1)
@@ -38,12 +39,49 @@ saveRDS(myPCOA$CA$u,file=paste("qiime_mds_otu_loggedFiltered.RData",sep=""))
 saveRDS(myPCOA$CA$eig/sum(myPCOA$CA$eig),file=paste("qiime_eigenValues_otu_loggedFiltered.RData", sep=""))
 setwd("..")
 
+###################################################### OTUs Rarefied #############################################################33
+setwd("data/microbialClassifications/")
+inFileName <- paste("qiime_otuRarefiedLevel.txt", sep ="")
+print(inFileName)
+myT <-read.delim(inFileName,header=TRUE,row.names=1)
+myT <- t(myT)
+myTLogged <- log10(myT +1)
+myTLogged <- myTLogged[,(colSums(myTLogged==0)/dim(myTLogged)[1])<=0.75]
+myPCOA <- capscale(myTLogged~1,distance="bray")
+
+setwd("../../mds/")
+saveRDS(myPCOA$CA$u,file=paste("qiime_mds_otuRarefied_loggedFiltered.RData",sep=""))
+saveRDS(myPCOA$CA$eig/sum(myPCOA$CA$eig),file=paste("qiime_eigenValues_otuRarefied_loggedFiltered.RData", sep=""))
+setwd("..")
+
+taxaLevels <- c("phylumRarefied","classRarefied","orderRarefied","familyRarefied","genusRarefied")
+tools <- c("qiime")
+for(tool in tools)
+{
+  for(taxa in taxaLevels )
+  {
+    setwd("data/microbialClassifications/")
+    inFileName <- paste(tool,"_",taxa, "Level.txt", sep ="")
+    print(inFileName)
+    myT <-read.delim(inFileName,header = TRUE, row.names=1)
+    myT <- t(myT)
+    myTLogged <- log10(myT +1)
+    #myTLogged <- myTLogged[,(colSums(myTLogged==0)/dim(myTLogged)[1])<=0.75]
+    myPCOA <- capscale(myTLogged~1,distance="bray")
+    
+    setwd("../../mds/")
+    saveRDS(myPCOA$CA$u,file=paste(tool,"_mds_", taxa, "_loggedFiltered.RData",sep=""))
+    saveRDS(myPCOA$CA$eig/sum(myPCOA$CA$eig),file=paste(tool,"_eigenValues_", taxa, "_loggedFiltered.RData", sep=""))
+    setwd("..")
+  }
+}
+
 
 ############################################ Metaphlan ############################################
 taxaLevels <- c("phylum","class","order","family","genus")
 for(taxa in taxaLevels )
 {
-  setwd("data/microbialClassfications/")
+  setwd("data/microbialClassifications/")
   inFileName <- paste("metaphlan_",taxa, "Level.txt", sep ="")
   print(inFileName)
   myT <-read.delim(inFileName,header=TRUE, row.names=1)
@@ -65,7 +103,7 @@ for(tool in tools)
 {
   for(taxa in taxaLevels )
   {
-    setwd("data/microbialClassfications/")
+    setwd("data/microbialClassifications/")
     inFileName <- paste(tool,"_",taxa, "Level.txt", sep ="")
     print(inFileName)
     myT <-read.delim(inFileName,header=TRUE, row.names=1)
@@ -118,7 +156,7 @@ for(tool in tools)
 taxaLevels <- c("phylum","class","order","family","genus","species")
 for(taxa in taxaLevels )
 {
-  setwd("data/microbialClassfications/")
+  setwd("data/microbialClassifications/")
   inFileName <- paste("krakenWGS","_",taxa, "Level.txt", sep ="")
   print(inFileName)
   myT <-read.delim(inFileName,header=TRUE, row.names=1)

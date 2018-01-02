@@ -1,0 +1,1 @@
+Taxa	stoolMeans	stoolSDs	swabMeans	swabSDs	ttest p-value	wilcoxon p-value	Ttest (adj p-value)	Wilcoxon (adj p-value)

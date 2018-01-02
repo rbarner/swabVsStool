@@ -95,7 +95,7 @@ for(classifier in classifierList)
     graphics.off()
     
     comp1Participant<-as.character(paste("MDS1 ", (round(eigen[1],3))*100,"%",sep=""));
-    comp1ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format.pval(pVal_participant_mds1,3),", Origin p-value = ",format.pval(pVal_origin_mds1,3),sep=""));
+    comp1ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format.pval(pVal_participant_mds1,3),", Sample Type p-value = ",format.pval(pVal_origin_mds1,3),sep=""));
 
     p <- ggplot(mdsMeta,aes(x=study_id,y=MDS1))
     tiff(paste("2_mdsPlot_Axes1_",classifier,"_",taxa,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
@@ -121,7 +121,7 @@ for(classifier in classifierList)
     graphics.off()
     
     comp3Participant<-as.character(paste("MDS3 ", (round(eigen[3],3))*100,"%",sep=""));
-    comp3ParticipantMDS <-as.character(paste("Participant\nParticipant p-value = ",format.pval(pVal_participant_mds3,3),", Origin p-value = ",format.pval(pVal_origin_mds3,3),sep=""));
+    comp3ParticipantMDS <-as.character(paste("Participant\nParticipant p-value = ",format.pval(pVal_participant_mds3,3),", Sample Type p-value = ",format.pval(pVal_origin_mds3,3),sep=""));
 
     p <- ggplot(mdsMeta,aes(x=study_id,y=MDS3))
     tiff(paste("2_mdsPlot_Axes3_",classifier,"_",taxa,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
@@ -147,7 +147,7 @@ for(classifier in classifierList)
     graphics.off()
     
     comp4Participant<-as.character(paste("MDS4 ", (round(eigen[4],3))*100,"%",sep=""));
-    comp4ParticipantMDS <-as.character(paste("Participant\nParticipant p-value = ",format.pval(pVal_participant_mds4,3),", Origin p-value = ",format.pval(pVal_origin_mds4,3),sep=""));
+    comp4ParticipantMDS <-as.character(paste("Participant\nParticipant p-value = ",format.pval(pVal_participant_mds4,3),", Sample Type p-value = ",format.pval(pVal_origin_mds4,3),sep=""));
     
     p <- ggplot(mdsMeta,aes(x=study_id,y=MDS4))
     tiff(paste("2_mdsPlot_Axes4_",classifier,"_",taxa,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
@@ -271,7 +271,7 @@ for(funct in functionList)
     graphics.off()
     
     comp1Participant<-as.character(paste("MDS1 ", (round(eigen[1],3))*100,"%",sep=""));
-    comp1ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format.pval(pVal_participant_mds1,3),", Origin p-value = ",format.pval(pVal_origin_mds1,3),sep=""));
+    comp1ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format.pval(pVal_participant_mds1,3),", Sample Type p-value = ",format.pval(pVal_origin_mds1,3),sep=""));
     p <- ggplot(mdsMeta,aes(x=study_id,y=MDS1))
     tiff(paste("2_mdsPlot_Axes1_",funct,"_",wgs,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
     print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
@@ -295,7 +295,7 @@ for(funct in functionList)
     graphics.off()
 
     comp3Participant<-as.character(paste("MDS3 ", (round(eigen[3],3))*100,"%",sep=""));
-    comp3ParticipantMDS <-as.character(paste("Participant\nParticipant p-value = ",format.pval(pVal_participant_mds3,3),", Origin p-value = ",format.pval(pVal_origin_mds3,3),sep=""));
+    comp3ParticipantMDS <-as.character(paste("Participant\nParticipant p-value = ",format.pval(pVal_participant_mds3,3),", Sample Type p-value = ",format.pval(pVal_origin_mds3,3),sep=""));
     p <- ggplot(mdsMeta,aes(x=study_id,y=MDS3))
     tiff(paste("2_mdsPlot_Axes3_",funct,"_",wgs,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
     print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
@@ -320,7 +320,7 @@ for(funct in functionList)
     graphics.off()
     
     comp4Participant<-as.character(paste("MDS4 ", (round(eigen[4],3))*100,"%",sep=""));
-    comp4ParticipantMDS <-as.character(paste("Participant\nParticipant p-value = ",format.pval(pVal_participant_mds4,3),", Origin p-value = ",format.pval(pVal_origin_mds4,3),sep=""));
+    comp4ParticipantMDS <-as.character(paste("Participant\nParticipant p-value = ",format.pval(pVal_participant_mds4,3),", Sample Type p-value = ",format.pval(pVal_origin_mds4,3),sep=""));
     p <- ggplot(mdsMeta,aes(x=study_id,y=MDS4))
     tiff(paste("2_mdsPlot_Axes4_",funct,"_",wgs,"_coloredByOrigin_barchart.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
     print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
@@ -503,7 +503,7 @@ for(wgs in wgsLevels )
   setwd("..") 
 }
 
-########################## Make Metaphlan 
+########################## Make Metaphlan ########################
 taxaLevels <- c("phylum","class","order","family","genus")
 for(taxa in taxaLevels )
 {
@@ -739,7 +739,7 @@ for(taxa in taxaLevels )
   graphics.off()
   
   comp1Participant<-as.character(paste("MDS1 ", (round(eigen[1],3))*100,"%",sep=""));
-  comp1ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format.pval(pVal_participant_mds1,3),", Origin p-value = ",format.pval(pVal_origin_mds1,3),sep=""));
+  comp1ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format.pval(pVal_participant_mds1,3),", Sample Type p-value = ",format.pval(pVal_origin_mds1,3),sep=""));
   p <- ggplot(mdsMeta,aes(x=study_id,y=MDS1))
   tiff(paste("2_mdsPlot_Axes1_krakenWGS_",taxa,"_coloredByOrigin_barchart_NoTissue.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
   print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
@@ -764,7 +764,7 @@ for(taxa in taxaLevels )
   graphics.off()
   
   comp3Participant<-as.character(paste("MDS3 ", (round(eigen[3],3))*100,"%",sep=""));
-  comp3ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format.pval(pVal_participant_mds3,3),", Origin p-value = ",format.pval(pVal_origin_mds3,3),sep=""));
+  comp3ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format.pval(pVal_participant_mds3,3),", Sample Type p-value = ",format.pval(pVal_origin_mds3,3),sep=""));
   p <- ggplot(mdsMeta,aes(x=study_id,y=MDS3))
   tiff(paste("2_mdsPlot_Axes3_krakenWGS_",taxa,"_coloredByOrigin_barchart_NoTissue.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
   print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
@@ -789,7 +789,7 @@ for(taxa in taxaLevels )
   graphics.off()
   
   comp4Participant<-as.character(paste("MDS4 ", (round(eigen[4],3))*100,"%",sep=""));
-  comp4ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format.pval(pVal_participant_mds4,3),", Origin p-value = ",format.pval(pVal_origin_mds4,3),sep=""));
+  comp4ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format.pval(pVal_participant_mds4,3),", Sample Type p-value = ",format.pval(pVal_origin_mds4,3),sep=""));
   p <- ggplot(mdsMeta,aes(x=study_id,y=MDS4))
   tiff(paste("2_mdsPlot_Axes4_krakenWGS_",taxa,"_coloredByOrigin_barchart_NoTissue.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
   print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
@@ -904,7 +904,7 @@ for(wgs in wgsLevels )
   graphics.off()
   
   comp1Participant<-as.character(paste("MDS1 ", (round(eigen[1],3))*100,"%",sep=""));
-  comp1ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format.pval(pVal_participant_mds1,3),", Origin p-value = ",format.pval(pVal_origin_mds1,3),sep=""));
+  comp1ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format.pval(pVal_participant_mds1,3),", Sample Type p-value = ",format.pval(pVal_origin_mds1,3),sep=""));
   p <- ggplot(mdsMeta,aes(x=study_id,y=MDS1))
   tiff(paste("2_mdsPlot_Axes1_wgs_",wgs,"_coloredByOrigin_barchart_NoTissue.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
   print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
@@ -929,7 +929,7 @@ for(wgs in wgsLevels )
   graphics.off()
   
   comp1Participant<-as.character(paste("MDS1 ", (round(eigen[1],3))*100,"%",sep=""));
-  comp1ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format.pval(pVal_participant_mds1,3),", Origin p-value = ",format.pval(pVal_origin_mds1,3),sep=""));
+  comp1ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format.pval(pVal_participant_mds1,3),", Sample Type p-value = ",format.pval(pVal_origin_mds1,3),sep=""));
   p <- ggplot(mdsMeta,aes(x=study_id,y=MDS1))
   tiff(paste("2_mdsPlot_Axes1_wgs_",wgs,"_coloredByOrigin_barchart_NoTissue.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
   print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
@@ -954,7 +954,7 @@ for(wgs in wgsLevels )
   graphics.off()
   
   comp3Participant<-as.character(paste("MDS3 ", (round(eigen[3],3))*100,"%",sep=""));
-  comp3ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format.pval(pVal_participant_mds3,3),", Origin p-value = ",format.pval(pVal_origin_mds3),sep=""));
+  comp3ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format.pval(pVal_participant_mds3,3),", Sample Type p-value = ",format.pval(pVal_origin_mds3),sep=""));
   p <- ggplot(mdsMeta,aes(x=study_id,y=MDS3))
   tiff(paste("2_mdsPlot_Axes3_wgs_",wgs,"_coloredByOrigin_barchart_NoTissue.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
   print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +
@@ -979,7 +979,7 @@ for(wgs in wgsLevels )
   graphics.off()
   
   comp4Participant<-as.character(paste("MDS4 ", (round(eigen[4],3))*100,"%",sep=""));
-  comp4ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format.pval(pVal_participant_mds4,3),", Origin p-value = ",format.pval(pVal_origin_mds4),sep=""));
+  comp4ParticipantMDS <-as.character(paste("Participants\nParticipant p-value = ",format.pval(pVal_participant_mds4,3),", Sample Type p-value = ",format.pval(pVal_origin_mds4),sep=""));
   p <- ggplot(mdsMeta,aes(x=study_id,y=MDS4))
   tiff(paste("2_mdsPlot_Axes4_wgs_",wgs,"_coloredByOrigin_barchart_NoTissue.tiff",sep=""),width=400,height=200,units="mm",compression="lzw",res=350)
   print(p +geom_boxplot()+ geom_point(aes(colour = Origin,shape=Origin),size = 8) +

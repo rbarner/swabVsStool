@@ -1,4 +1,5 @@
-library(RColorBrewer)
+library(RColorBrewer);
+require(ggplot2);
 require(nlme);
 
 sampleData <- read.delim("data/key/mapping_key_16S.txt",header = TRUE, row.names=1);
@@ -6,9 +7,9 @@ sampleData$visit <- unlist(strsplit(as.character(sampleData$type),split = "_"))[
 sampleData2 <- read.delim("data/key/mapping_key_WGS.txt",header = TRUE, row.names=1);
 names(sampleData2)[1] <- "Origin"
 
-taxaLevels <- c("phylum","class","order","family","genus","species")
+taxaLevels <- c("phylumRarefied","classRarefied","orderRarefied","familyRarefied","genusRarefied","otuRarefied")
 #classifierList <- c("qiime","rdpClassifications")
-classifierList <- c("kraken16S")
+classifierList <- c("qiime")
 for(classifier in classifierList)
 {
   for(taxa in taxaLevels )
@@ -38,8 +39,12 @@ for(classifier in classifierList)
       simpleMod <- gls(model,method="REML",data=mdsMeta);
       mixedMod <- lme(model,method="REML",random=~1|study_id,data=mdsMeta);
       
-      pValOrigin <- pf(anova(simpleMod)$"F-value"[2],2,236,lower.tail = FALSE);
-      pValTime <- pf(anova(simpleMod)$"F-value"[3],1,236,lower.tail = FALSE);
+      #pValOrigin <- pf(anova(simpleMod)$"F-value"[2],2,236,lower.tail = FALSE);
+      pValOrigin <- pf(anova(mixedMod)$"F-value"[2],anova(mixedMod)$"numDF"[2],anova(mixedMod)$"denDF"[2],lower.tail = FALSE);
+      
+      #pValTime <- pf(anova(simpleMod)$"F-value"[3],1,236,lower.tail = FALSE);
+      pValTime <- pf(anova(mixedMod)$"F-value"[3],anova(mixedMod)$"numDF"[3],anova(mixedMod)$"denDF"[3],lower.tail = FALSE);
+      
       pValIndividual <- pchisq(anova(simpleMod,mixedMod)$"L.Ratio"[2],1,lower.tail = FALSE)
       
       pValOriginList[[length(pValOriginList)+1]] <- pValOrigin;
@@ -69,7 +74,8 @@ for(classifier in classifierList)
             xlab("MDS axes") + ylab("-Log10(pValue)") +
             ggtitle(taxa) +
             theme_classic(base_size = 28)+
-            theme(axis.line=element_line(size=1),
+            theme(plot.title = element_text(hjust = 0.5),
+                  axis.line=element_line(size=1),
                   axis.ticks=element_line(size=1),
                   axis.text=element_text(face="bold",size=24),
                   text=element_text(face="bold",size=24),
@@ -133,7 +139,8 @@ for(classifier in classifierList)
     p <- ggplot(makeTable)
     print(p + geom_point(aes(1:8,-log10(pValOriginList)),colour = "black",size = 6) +
             geom_line(aes(1:8,-log10(pValOriginList)),colour = "black",size = 3) +
-            ylim(minLimit,maxLimit)+
+            #ylim(minLimit,maxLimit)+
+            ylim(minLimit,30)+
             geom_point(aes(1:8,-log10(pValIndividualList)),colour = "red2",size = 6) +
             geom_line(aes(1:8,-log10(pValIndividualList)),colour = "red2",size = 3) +
             geom_point(aes(1:8,-log10(pValTimeList)),colour = "blue3",size = 6) +
@@ -142,7 +149,8 @@ for(classifier in classifierList)
             xlab("MDS axes") + ylab("-Log10(pValue)") +
             ggtitle(taxa) +
             theme_classic(base_size = 28)+
-            theme(axis.line=element_line(size=1),
+            theme(plot.title = element_text(hjust = 0.5),
+                  axis.line=element_line(size=1),
                   axis.ticks=element_line(size=1),
                   axis.text=element_text(face="bold",size=24),
                   text=element_text(face="bold",size=24),

@@ -1,0 +1,6 @@
+DiversityIndice	stoolMeans	stoolSDs	swabMeans	swabSDs	Origin adj p-value	Participant adj p-value
+shannonDiversity	0.978	0.167	1.15	0.26	1.63e-09	0.0115
+simpsonDiversity	0.527	0.073	0.589	0.092	9.54e-09	0.0177
+invSimpsonDiversity	2.166	0.353	2.577	0.676	1.26e-08	0.0925
+richness	14.907	3.665	16.196	3.676	0.000189	1.01e-13
+evenness	0.368	0.06	0.415	0.078	4.7e-08	0.000509
